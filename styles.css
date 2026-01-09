@@ -4835,26 +4835,29 @@
 .hamburger-btn {
     display: none;
     flex-direction: column;
-    justify-content: space-between;
-    width: 28px;
-    height: 20px;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0;
+    padding: 12px 8px;
     z-index: 1001;
+    box-sizing: border-box;
 }
 
 .hamburger-line {
     display: block;
-    width: 100%;
+    width: 24px;
     height: 2px;
     background: var(--text);
     transition: all 0.3s ease;
+    margin: 2px 0;
 }
 
 .hamburger-btn.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 6px);
+    transform: rotate(45deg) translate(4px, 5px);
 }
 
 .hamburger-btn.active .hamburger-line:nth-child(2) {
@@ -4862,14 +4865,14 @@
 }
 
 .hamburger-btn.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -6px);
+    transform: rotate(-45deg) translate(4px, -5px);
 }
 
 /* Mobile Menu Dropdown */
 .mobile-menu {
     display: none;
-    position: fixed;
-    top: 50px;
+    position: absolute;
+    top: 100%;
     right: 0;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -4879,6 +4882,7 @@
     gap: 0.75rem;
     z-index: 1000;
     min-width: 180px;
+    max-width: 90vw;
     box-shadow: -2px 4px 12px rgba(0,0,0,0.5);
 }
 
@@ -4898,6 +4902,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+/* Header right needs relative position for mobile menu */
+.header-right {
+    position: relative;
 }
 
 /* ==========================================
@@ -5104,11 +5113,11 @@
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        overflow-y: hidden !important;
+        overflow-y: visible !important;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
         gap: 0;
-        max-height: 180px;
+        max-height: none;
         padding-bottom: 0.5rem;
     }
 

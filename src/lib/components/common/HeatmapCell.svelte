@@ -9,8 +9,9 @@
 
 	let { sector, showSymbol = false }: Props = $props();
 
-	const colorClass = $derived(() => {
-		const change = sector.changePercent;
+	const colorClass = $derived(getColorClass(sector.changePercent));
+
+	function getColorClass(change: number): string {
 		if (change >= 2) return 'up-3';
 		if (change >= 1) return 'up-2';
 		if (change >= 0.5) return 'up-1';
@@ -19,12 +20,12 @@
 		if (change >= -1) return 'down-1';
 		if (change >= -2) return 'down-2';
 		return 'down-3';
-	});
+	}
 
 	const changeText = $derived(formatPercentChange(sector.changePercent));
 </script>
 
-<div class="heatmap-cell {colorClass()}">
+<div class="heatmap-cell {colorClass}">
 	<div class="sector-name">{sector.name}</div>
 	{#if showSymbol}
 		<div class="sector-symbol">{sector.symbol}</div>

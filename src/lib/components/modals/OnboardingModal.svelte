@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PRESETS, PRESET_ORDER, type Preset } from '$lib/config';
+	import { PRESETS, PRESET_ORDER } from '$lib/config';
 
 	interface Props {
 		open: boolean;

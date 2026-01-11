@@ -21,17 +21,23 @@
 	let { panelId, config, news = [], loading = false, error = null }: Props = $props();
 
 	// Calculate threat level based on news
-	const threatLevel = $derived(() => {
-		if (news.length === 0) return { level: 'monitoring', text: 'MONITORING' };
+	const threatLevel = $derived(calculateThreatLevel(news, config.criticalKeywords));
+
+	function calculateThreatLevel(
+		newsItems: NewsItem[],
+		criticalKeywords: string[] = []
+	): { level: string; text: string } {
+		if (newsItems.length === 0) {
+			return { level: 'monitoring', text: 'MONITORING' };
+		}
 
 		const now = Date.now();
-		const recentNews = news.filter((n) => {
+		const recentNews = newsItems.filter((n) => {
 			const hoursSince = (now - n.timestamp) / (1000 * 60 * 60);
 			return hoursSince < 24;
 		});
 
-		const criticalKeywords = config.criticalKeywords || [];
-		const hasCritical = news.some((n) =>
+		const hasCritical = newsItems.some((n) =>
 			criticalKeywords.some((k) => n.title.toLowerCase().includes(k))
 		);
 
@@ -42,14 +48,14 @@
 			return { level: 'elevated', text: 'ELEVATED' };
 		}
 		return { level: 'monitoring', text: 'MONITORING' };
-	});
+	}
 </script>
 
 <Panel
 	id={panelId}
 	title={config.title}
-	status={threatLevel().text}
-	statusClass={threatLevel().level}
+	status={threatLevel.text}
+	statusClass={threatLevel.level}
 	{loading}
 	{error}
 >

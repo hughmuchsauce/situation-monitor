@@ -38,6 +38,12 @@
 				return 'signal-weak';
 		}
 	}
+
+	function getDirectionArrow(delta: number): string {
+		if (delta > 0) return '↑';
+		if (delta < 0) return '↓';
+		return '→';
+	}
 </script>
 
 <Panel id="correlation" title="Pattern Analysis" {loading} {error}>
@@ -76,7 +82,7 @@
 								class:up={signal.delta > 0}
 								class:down={signal.delta < 0}
 							>
-								{signal.delta > 0 ? '↑' : signal.delta < 0 ? '↓' : '→'}
+								{getDirectionArrow(signal.delta)}
 								{signal.current}
 							</span>
 						</div>

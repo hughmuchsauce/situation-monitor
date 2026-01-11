@@ -7,28 +7,29 @@
 	const error = $derived($commodities.error);
 
 	// VIX status for panel header
-	const vixStatus = $derived(() => {
-		if (!$vix) return '';
-		const level = $vix.price;
+	const vixStatus = $derived(getVixStatus($vix?.price));
+	const vixClass = $derived(getVixClass($vix?.price));
+
+	function getVixStatus(level: number | undefined): string {
+		if (level === undefined) return '';
 		if (level >= 30) return 'HIGH FEAR';
 		if (level >= 20) return 'ELEVATED';
 		return 'LOW';
-	});
+	}
 
-	const vixClass = $derived(() => {
-		if (!$vix) return '';
-		const level = $vix.price;
+	function getVixClass(level: number | undefined): string {
+		if (level === undefined) return '';
 		if (level >= 30) return 'critical';
 		if (level >= 20) return 'elevated';
 		return 'monitoring';
-	});
+	}
 </script>
 
 <Panel
 	id="commodities"
 	title="Commodities / VIX"
-	status={vixStatus()}
-	statusClass={vixClass()}
+	status={vixStatus}
+	statusClass={vixClass}
 	{loading}
 	{error}
 >

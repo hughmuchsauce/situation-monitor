@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { Panel, Badge } from '$lib/components/common';
 	import { timeAgo } from '$lib/utils';
-	import type { CustomMonitor, NewsItem } from '$lib/types';
+	import type { CustomMonitor } from '$lib/types';
 	import type { MonitorMatch } from '$lib/stores/monitors';
 
 	interface Props {
 		monitors?: CustomMonitor[];
 		matches?: MonitorMatch[];
-		news?: NewsItem[];
 		loading?: boolean;
 		error?: string | null;
 		onCreateMonitor?: () => void;

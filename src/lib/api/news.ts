@@ -1,11 +1,12 @@
 /**
- * News API - Fetch news from GDELT and other sources
+ * News API - Fetch Greenland-focused news from GDELT
  */
 
 import { FEEDS } from '$lib/config/feeds';
 import type { NewsItem, NewsCategory } from '$lib/types';
 import { containsAlertKeyword, detectRegion, detectTopics } from '$lib/config/keywords';
 import { fetchWithProxy, API_DELAYS, logger } from '$lib/config/api';
+import { GREENLAND_GDELT_QUERY } from '$lib/config/greenland';
 
 /**
  * Simple hash function to generate unique IDs from URLs
@@ -86,18 +87,23 @@ function transformGdeltArticle(
 	};
 }
 
+// Greenland filter to append to all queries
+const GREENLAND_FILTER =
+	'(Greenland OR Nuuk OR "Kalaallit Nunaat" OR Pituffik OR Thule OR "Danish realm" OR "arctic greenland" OR Denmark)';
+
 /**
  * Fetch news for a specific category using GDELT via proxy
+ * All queries are filtered to include Greenland-relevant content
  */
 export async function fetchCategoryNews(category: NewsCategory): Promise<NewsItem[]> {
-	// Build query from category keywords (GDELT requires OR queries in parentheses)
+	// Build query from category keywords with Greenland focus
 	const categoryQueries: Record<NewsCategory, string> = {
-		politics: '(politics OR government OR election OR congress)',
-		tech: '(technology OR software OR startup OR "silicon valley")',
-		finance: '(finance OR "stock market" OR economy OR banking)',
-		gov: '("federal government" OR "white house" OR congress OR regulation)',
-		ai: '("artificial intelligence" OR "machine learning" OR AI OR ChatGPT)',
-		intel: '(intelligence OR security OR military OR defense)'
+		politics: `(${GREENLAND_FILTER} AND (politics OR government OR election OR parliament OR independence))`,
+		tech: `(${GREENLAND_FILTER} AND (technology OR mining OR "rare earth" OR infrastructure OR research))`,
+		finance: `(${GREENLAND_FILTER} AND (economy OR investment OR mining OR trade OR business))`,
+		gov: `(${GREENLAND_FILTER} AND (government OR policy OR "foreign affairs" OR treaty OR nato))`,
+		ai: `(arctic OR greenland) AND ("artificial intelligence" OR "machine learning" OR climate OR research)`,
+		intel: `(${GREENLAND_FILTER} AND (military OR security OR defense OR nato OR "arctic security"))`
 	};
 
 	try {
@@ -105,9 +111,9 @@ export async function fetchCategoryNews(category: NewsCategory): Promise<NewsIte
 		const baseQuery = categoryQueries[category];
 		const fullQuery = `${baseQuery} sourcelang:english`;
 		// Build the raw GDELT URL with timespan=7d to get recent articles
-		const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${fullQuery}&timespan=7d&mode=artlist&maxrecords=20&format=json&sort=date`;
+		const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(fullQuery)}&timespan=7d&mode=artlist&maxrecords=25&format=json&sort=date`;
 
-		logger.log('News API', `Fetching ${category} from GDELT`);
+		logger.log('News API', `Fetching ${category} from GDELT with Greenland filter`);
 
 		const response = await fetchWithProxy(gdeltUrl);
 		if (!response.ok) {
@@ -170,4 +176,43 @@ export async function fetchAllNews(): Promise<Record<NewsCategory, NewsItem[]>> 
 	}
 
 	return result;
+}
+
+/**
+ * Fetch Greenland-specific news (primary query)
+ */
+export async function fetchGreenlandNews(): Promise<NewsItem[]> {
+	try {
+		const fullQuery = `${GREENLAND_GDELT_QUERY} sourcelang:english`;
+		const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(fullQuery)}&timespan=7d&mode=artlist&maxrecords=50&format=json&sort=date`;
+
+		logger.log('News API', 'Fetching primary Greenland news');
+
+		const response = await fetchWithProxy(gdeltUrl);
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+
+		const contentType = response.headers.get('content-type');
+		if (!contentType?.includes('application/json')) {
+			return [];
+		}
+
+		const text = await response.text();
+		let data: GdeltResponse;
+		try {
+			data = JSON.parse(text);
+		} catch {
+			return [];
+		}
+
+		if (!data?.articles) return [];
+
+		return data.articles.map((article, index) =>
+			transformGdeltArticle(article, 'politics', article.domain || 'News', index)
+		);
+	} catch (error) {
+		logger.error('News API', 'Error fetching Greenland news:', error);
+		return [];
+	}
 }

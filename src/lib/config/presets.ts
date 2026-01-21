@@ -1,5 +1,5 @@
 /**
- * Onboarding presets for first-time users
+ * Onboarding presets for Greenland Situation Monitor
  */
 
 import type { PanelId } from './panels';
@@ -13,88 +13,48 @@ export interface Preset {
 }
 
 export const PRESETS: Record<string, Preset> = {
-	'news-junkie': {
-		id: 'news-junkie',
-		name: 'News Junkie',
-		icon: '📰',
-		description: 'Stay on top of breaking news across politics, tech, and finance',
-		panels: ['politics', 'tech', 'finance', 'gov', 'ai', 'mainchar', 'map']
+	'greenland-focus': {
+		id: 'greenland-focus',
+		name: 'Greenland Focus',
+		icon: '🇬🇱',
+		description: 'Primary Greenland monitoring with news, leaders, and situation tracking',
+		panels: ['map', 'politics', 'greenland', 'leaders', 'intel', 'correlation', 'monitors']
 	},
-	trader: {
-		id: 'trader',
-		name: 'Trader',
-		icon: '📈',
-		description: 'Market-focused dashboard with stocks, crypto, and commodities',
-		panels: [
-			'markets',
-			'heatmap',
-			'commodities',
-			'crypto',
-			'polymarket',
-			'whales',
-			'printer',
-			'finance',
-			'map'
-		]
-	},
-	geopolitics: {
-		id: 'geopolitics',
-		name: 'Geopolitics Watcher',
+	'arctic-watcher': {
+		id: 'arctic-watcher',
+		name: 'Arctic Watcher',
 		icon: '🌍',
-		description: 'Global situation awareness and regional hotspots',
-		panels: [
-			'map',
-			'intel',
-			'leaders',
-			'politics',
-			'gov',
-			'venezuela',
-			'greenland',
-			'iran',
-			'correlation',
-			'narrative'
-		]
+		description: 'Broader Arctic focus including security, shipping, and climate',
+		panels: ['map', 'politics', 'greenland', 'intel', 'leaders', 'gov', 'correlation', 'narrative']
 	},
-	intel: {
-		id: 'intel',
+	'intel-analyst': {
+		id: 'intel-analyst',
 		name: 'Intelligence Analyst',
 		icon: '🔍',
-		description: 'Deep analysis, pattern detection, and narrative tracking',
-		panels: ['map', 'intel', 'leaders', 'correlation', 'narrative', 'mainchar', 'politics']
+		description: 'Deep analysis with pattern detection and narrative tracking',
+		panels: ['map', 'intel', 'leaders', 'correlation', 'narrative', 'mainchar', 'greenland']
 	},
 	minimal: {
 		id: 'minimal',
 		name: 'Minimal',
 		icon: '⚡',
-		description: 'Just the essentials - map, news, and markets',
-		panels: ['map', 'politics', 'markets']
+		description: 'Just the essentials - map, news, and Greenland situation',
+		panels: ['map', 'politics', 'greenland']
 	},
 	everything: {
 		id: 'everything',
 		name: 'Everything',
 		icon: '🎛️',
-		description: 'Kitchen sink - all panels enabled',
+		description: 'All available panels enabled',
 		panels: [
 			'map',
 			'politics',
 			'tech',
 			'finance',
 			'gov',
-			'heatmap',
-			'markets',
 			'monitors',
-			'commodities',
-			'crypto',
-			'polymarket',
-			'whales',
 			'mainchar',
-			'printer',
-			'contracts',
-			'ai',
-			'layoffs',
-			'venezuela',
 			'greenland',
-			'iran',
 			'leaders',
 			'intel',
 			'correlation',
@@ -104,10 +64,9 @@ export const PRESETS: Record<string, Preset> = {
 };
 
 export const PRESET_ORDER = [
-	'news-junkie',
-	'trader',
-	'geopolitics',
-	'intel',
+	'greenland-focus',
+	'arctic-watcher',
+	'intel-analyst',
 	'minimal',
 	'everything'
 ];

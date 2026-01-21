@@ -1,5 +1,6 @@
 /**
  * Analysis configuration - correlation topics, narrative patterns, source classification
+ * Focused on Greenland, Arctic, and Danish relations
  */
 
 export interface CorrelationTopic {
@@ -22,219 +23,180 @@ export interface SourceTypes {
 }
 
 export const CORRELATION_TOPICS: CorrelationTopic[] = [
+	// Greenland-specific topics
 	{
-		id: 'tariffs',
-		patterns: [/tariff/i, /trade war/i, /import tax/i, /customs duty/i],
-		category: 'Economy'
+		id: 'greenland-independence',
+		patterns: [
+			/greenland.*independence/i,
+			/greenland.*sovereignty/i,
+			/greenland.*self-rule/i,
+			/kalaallit.*autonomy/i
+		],
+		category: 'Sovereignty'
 	},
 	{
-		id: 'fed-rates',
-		patterns: [/federal reserve/i, /interest rate/i, /rate cut/i, /rate hike/i, /powell/i, /fomc/i],
-		category: 'Economy'
-	},
-	{
-		id: 'inflation',
-		patterns: [/inflation/i, /cpi/i, /consumer price/i, /cost of living/i],
-		category: 'Economy'
-	},
-	{
-		id: 'ai-regulation',
-		patterns: [/ai regulation/i, /artificial intelligence.*law/i, /ai safety/i, /ai governance/i],
-		category: 'Tech'
-	},
-	{
-		id: 'china-tensions',
-		patterns: [/china.*taiwan/i, /south china sea/i, /us.*china/i, /beijing.*washington/i],
+		id: 'us-greenland',
+		patterns: [
+			/trump.*greenland/i,
+			/us.*greenland/i,
+			/america.*greenland/i,
+			/greenland.*acquisition/i,
+			/greenland.*purchase/i
+		],
 		category: 'Geopolitics'
 	},
 	{
-		id: 'russia-ukraine',
-		patterns: [/ukraine/i, /zelensky/i, /putin.*war/i, /crimea/i, /donbas/i],
-		category: 'Conflict'
-	},
-	{
-		id: 'israel-gaza',
-		patterns: [/gaza/i, /hamas/i, /netanyahu/i, /israel.*attack/i, /hostage/i],
-		category: 'Conflict'
-	},
-	{
-		id: 'iran',
-		patterns: [/iran.*nuclear/i, /tehran/i, /ayatollah/i, /iranian.*strike/i],
-		category: 'Geopolitics'
-	},
-	{
-		id: 'crypto',
-		patterns: [/bitcoin/i, /crypto.*regulation/i, /ethereum/i, /sec.*crypto/i],
-		category: 'Finance'
-	},
-	{
-		id: 'housing',
-		patterns: [/housing market/i, /mortgage rate/i, /home price/i, /real estate.*crash/i],
-		category: 'Economy'
-	},
-	{
-		id: 'layoffs',
-		patterns: [/layoff/i, /job cut/i, /workforce reduction/i, /downsizing/i],
-		category: 'Business'
-	},
-	{
-		id: 'bank-crisis',
-		patterns: [/bank.*fail/i, /banking crisis/i, /fdic/i, /bank run/i],
-		category: 'Finance'
-	},
-	{
-		id: 'election',
-		patterns: [/election/i, /polling/i, /campaign/i, /ballot/i, /voter/i],
+		id: 'denmark-greenland',
+		patterns: [
+			/denmark.*greenland/i,
+			/danish.*greenland/i,
+			/frederiksen.*greenland/i,
+			/danish realm/i,
+			/rigsfaellesskab/i
+		],
 		category: 'Politics'
 	},
 	{
-		id: 'immigration',
-		patterns: [/immigration/i, /border.*crisis/i, /migrant/i, /deportation/i, /asylum/i],
-		category: 'Politics'
+		id: 'greenland-mining',
+		patterns: [
+			/greenland.*mining/i,
+			/greenland.*rare earth/i,
+			/greenland.*minerals/i,
+			/critical minerals.*greenland/i
+		],
+		category: 'Resources'
 	},
 	{
-		id: 'climate',
-		patterns: [/climate change/i, /wildfire/i, /hurricane/i, /extreme weather/i, /flood/i],
-		category: 'Environment'
-	},
-	{
-		id: 'pandemic',
-		patterns: [/pandemic/i, /outbreak/i, /virus.*spread/i, /who.*emergency/i, /bird flu/i],
-		category: 'Health'
-	},
-	{
-		id: 'nuclear',
-		patterns: [/nuclear.*threat/i, /nuclear weapon/i, /atomic/i, /icbm/i],
+		id: 'arctic-security',
+		patterns: [
+			/arctic.*security/i,
+			/arctic.*nato/i,
+			/arctic.*military/i,
+			/pituffik/i,
+			/thule.*base/i
+		],
 		category: 'Security'
 	},
 	{
-		id: 'supply-chain',
-		patterns: [/supply chain/i, /shipping.*delay/i, /port.*congestion/i, /logistics.*crisis/i],
-		category: 'Economy'
+		id: 'arctic-climate',
+		patterns: [
+			/greenland.*ice/i,
+			/arctic.*warming/i,
+			/greenland.*melt/i,
+			/ice sheet/i,
+			/arctic.*climate/i
+		],
+		category: 'Climate'
 	},
 	{
-		id: 'big-tech',
-		patterns: [/antitrust.*tech/i, /google.*monopoly/i, /meta.*lawsuit/i, /apple.*doj/i],
-		category: 'Tech'
+		id: 'arctic-shipping',
+		patterns: [/arctic.*shipping/i, /northwest passage/i, /northern sea route/i, /arctic.*route/i],
+		category: 'Shipping'
 	},
 	{
-		id: 'deepfake',
-		patterns: [/deepfake/i, /ai.*misinformation/i, /synthetic media/i],
-		category: 'Tech'
+		id: 'china-arctic',
+		patterns: [/china.*arctic/i, /china.*greenland/i, /polar silk road/i, /chinese.*arctic/i],
+		category: 'Geopolitics'
+	},
+	{
+		id: 'russia-arctic',
+		patterns: [/russia.*arctic/i, /russian.*arctic/i, /arctic.*militarization/i, /northern fleet/i],
+		category: 'Security'
+	},
+	{
+		id: 'nato-arctic',
+		patterns: [/nato.*arctic/i, /arctic.*defense/i, /giuk gap/i, /arctic.*alliance/i],
+		category: 'Security'
+	},
+
+	// General topics relevant to Greenland context
+	{
+		id: 'arctic-council',
+		patterns: [/arctic council/i, /arctic.*cooperation/i, /arctic.*governance/i],
+		category: 'Diplomacy'
+	},
+	{
+		id: 'nordic-cooperation',
+		patterns: [/nordic.*cooperation/i, /nordic council/i, /scandinavian.*greenland/i],
+		category: 'Diplomacy'
+	},
+	{
+		id: 'indigenous-rights',
+		patterns: [/inuit.*rights/i, /indigenous.*arctic/i, /kalaallit.*rights/i, /inuit.*governance/i],
+		category: 'Politics'
+	},
+	{
+		id: 'arctic-research',
+		patterns: [/arctic.*research/i, /greenland.*science/i, /ice core/i, /arctic.*expedition/i],
+		category: 'Science'
+	},
+	{
+		id: 'arctic-infrastructure',
+		patterns: [
+			/greenland.*airport/i,
+			/arctic.*infrastructure/i,
+			/greenland.*cable/i,
+			/arctic.*internet/i
+		],
+		category: 'Infrastructure'
 	}
 ];
 
 export const NARRATIVE_PATTERNS: NarrativePattern[] = [
+	// Greenland-specific narratives
 	{
-		id: 'deep-state',
-		keywords: ['deep state', 'shadow government', 'permanent state'],
-		category: 'Political',
-		severity: 'watch'
-	},
-	{
-		id: 'cbdc-control',
-		keywords: ['cbdc control', 'digital currency surveillance', 'social credit'],
-		category: 'Finance',
-		severity: 'watch'
-	},
-	{
-		id: 'wef-agenda',
-		keywords: ['great reset', 'wef agenda', 'world economic forum plot'],
-		category: 'Political',
-		severity: 'watch'
-	},
-	{
-		id: 'bio-weapon',
-		keywords: ['lab leak', 'bioweapon', 'gain of function'],
-		category: 'Health',
-		severity: 'emerging'
-	},
-	{
-		id: 'election-fraud',
-		keywords: ['election fraud', 'rigged election', 'stolen election', 'mail ballot fraud'],
-		category: 'Political',
-		severity: 'watch'
-	},
-	{
-		id: 'ai-doom',
-		keywords: ['ai doom', 'ai extinction', 'superintelligence risk', 'agi danger'],
-		category: 'Tech',
-		severity: 'emerging'
-	},
-	{
-		id: 'ai-consciousness',
-		keywords: ['ai sentient', 'ai conscious', 'ai feelings', 'ai alive'],
-		category: 'Tech',
-		severity: 'emerging'
-	},
-	{
-		id: 'robot-replacement',
-		keywords: ['robots replacing', 'automation unemployment', 'job automation'],
-		category: 'Economy',
-		severity: 'spreading'
-	},
-	{
-		id: 'china-invasion',
-		keywords: ['china taiwan invasion', 'china war', 'south china sea conflict'],
+		id: 'greenland-sale',
+		keywords: ['greenland for sale', 'buy greenland', 'greenland purchase', 'greenland deal'],
 		category: 'Geopolitical',
 		severity: 'watch'
 	},
 	{
-		id: 'nato-expansion',
-		keywords: ['nato provocation', 'nato aggression', 'nato encirclement'],
+		id: 'greenland-colonialism',
+		keywords: ['danish colonialism', 'greenland colonial', 'decolonization greenland'],
+		category: 'Political',
+		severity: 'emerging'
+	},
+	{
+		id: 'arctic-war',
+		keywords: ['arctic war', 'arctic conflict', 'arctic confrontation', 'arctic cold war'],
+		category: 'Security',
+		severity: 'watch'
+	},
+	{
+		id: 'rare-earth-war',
+		keywords: ['rare earth war', 'mineral war', 'critical minerals conflict'],
+		category: 'Resources',
+		severity: 'watch'
+	},
+	{
+		id: 'ice-apocalypse',
+		keywords: ['ice sheet collapse', 'greenland melt disaster', 'arctic apocalypse'],
+		category: 'Climate',
+		severity: 'emerging'
+	},
+	{
+		id: 'china-takeover',
+		keywords: ['china takeover arctic', 'chinese arctic dominance', 'china greenland threat'],
 		category: 'Geopolitical',
 		severity: 'watch'
 	},
 	{
-		id: 'dollar-collapse',
-		keywords: ['dollar collapse', 'dedollarization', 'brics currency', 'petrodollar death'],
-		category: 'Finance',
-		severity: 'spreading'
-	},
-	{
-		id: 'vaccine-injury',
-		keywords: ['vaccine injury', 'vaccine side effect', 'vaccine death', 'turbo cancer'],
-		category: 'Health',
+		id: 'nato-expansion-arctic',
+		keywords: ['nato arctic expansion', 'arctic militarization', 'arctic arms race'],
+		category: 'Security',
 		severity: 'watch'
 	},
 	{
-		id: 'next-pandemic',
-		keywords: ['next pandemic', 'disease x', 'bird flu pandemic'],
-		category: 'Health',
-		severity: 'emerging'
-	},
-	{
-		id: 'depopulation',
-		keywords: ['depopulation agenda', 'fertility crisis', 'population control'],
+		id: 'indigenous-erasure',
+		keywords: ['inuit erasure', 'indigenous displacement', 'kalaallit marginalization'],
 		category: 'Society',
-		severity: 'disinfo'
-	},
-	{
-		id: 'food-crisis',
-		keywords: ['food shortage', 'engineered famine', 'food supply attack'],
-		category: 'Economy',
-		severity: 'emerging'
-	},
-	{
-		id: 'energy-war',
-		keywords: ['energy crisis manufactured', 'green agenda', 'energy shortage'],
-		category: 'Economy',
-		severity: 'spreading'
+		severity: 'watch'
 	}
 ];
 
 export const SOURCE_TYPES: SourceTypes = {
-	fringe: [
-		'zerohedge',
-		'infowars',
-		'naturalnews',
-		'gateway',
-		'breitbart',
-		'epoch',
-		'revolver',
-		'dailycaller'
-	],
-	alternative: ['substack', 'rumble', 'bitchute', 'telegram', 'gab', 'gettr', 'truth social'],
+	fringe: ['zerohedge', 'infowars', 'naturalnews', 'gateway', 'breitbart'],
+	alternative: ['substack', 'rumble', 'telegram'],
 	mainstream: [
 		'reuters',
 		'ap news',
@@ -242,40 +204,41 @@ export const SOURCE_TYPES: SourceTypes = {
 		'cnn',
 		'nytimes',
 		'wsj',
-		'wapo',
 		'guardian',
-		'abc',
-		'nbc',
-		'cbs',
-		'fox'
+		'arctic today',
+		'high north news',
+		'the local'
 	]
 };
 
-// Main character patterns for tracking prominent figures
+// Main character patterns for tracking prominent figures in Greenland context
 export interface PersonPattern {
 	pattern: RegExp;
 	name: string;
 }
 
 export const PERSON_PATTERNS: PersonPattern[] = [
+	// Greenland leaders
+	{ pattern: /\begede\b/gi, name: 'Múte B. Egede' },
+	{ pattern: /\bmotzfeldt\b/gi, name: 'Vivian Motzfeldt' },
+
+	// Danish leaders
+	{ pattern: /\bfrederiksen\b/gi, name: 'Mette Frederiksen' },
+	{ pattern: /\brasmussen\b/gi, name: 'Lars Løkke Rasmussen' },
+	{ pattern: /\bfrederik\s*(x|ten)\b/gi, name: 'Frederik X' },
+
+	// US figures
 	{ pattern: /\btrump\b/gi, name: 'Trump' },
-	{ pattern: /\bbiden\b/gi, name: 'Biden' },
-	{ pattern: /\belon\b|\bmusk\b/gi, name: 'Elon Musk' },
+	{ pattern: /\brubio\b/gi, name: 'Marco Rubio' },
+	{ pattern: /\bvance\b/gi, name: 'JD Vance' },
+
+	// Other relevant leaders
 	{ pattern: /\bputin\b/gi, name: 'Putin' },
-	{ pattern: /\bzelensky\b/gi, name: 'Zelensky' },
 	{ pattern: /\bxi\s*jinping\b|\bxi\b/gi, name: 'Xi Jinping' },
-	{ pattern: /\bnetanyahu\b/gi, name: 'Netanyahu' },
-	{ pattern: /\bsam\s*altman\b/gi, name: 'Sam Altman' },
-	{ pattern: /\bmark\s*zuckerberg\b|\bzuckerberg\b/gi, name: 'Zuckerberg' },
-	{ pattern: /\bjeff\s*bezos\b|\bbezos\b/gi, name: 'Bezos' },
-	{ pattern: /\btim\s*cook\b/gi, name: 'Tim Cook' },
-	{ pattern: /\bsatya\s*nadella\b|\bnadella\b/gi, name: 'Satya Nadella' },
-	{ pattern: /\bsundar\s*pichai\b|\bpichai\b/gi, name: 'Sundar Pichai' },
-	{ pattern: /\bwarren\s*buffett\b|\bbuffett\b/gi, name: 'Warren Buffett' },
-	{ pattern: /\bjanet\s*yellen\b|\byellen\b/gi, name: 'Janet Yellen' },
-	{ pattern: /\bjerome\s*powell\b|\bpowell\b/gi, name: 'Jerome Powell' },
-	{ pattern: /\bkamala\s*harris\b|\bharris\b/gi, name: 'Kamala Harris' },
-	{ pattern: /\bnancy\s*pelosi\b|\bpelosi\b/gi, name: 'Nancy Pelosi' },
-	{ pattern: /\bjensen\s*huang\b|\bhuang\b/gi, name: 'Jensen Huang' },
-	{ pattern: /\bdario\s*amodei\b|\bamodei\b/gi, name: 'Dario Amodei' }
+	{ pattern: /\bcarney\b/gi, name: 'Mark Carney' },
+	{ pattern: /\bstøre\b|\bstore\b/gi, name: 'Jonas Gahr Støre' },
+
+	// Key figures in Arctic discourse
+	{ pattern: /\bblinken\b/gi, name: 'Antony Blinken' },
+	{ pattern: /\bstoltenberg\b/gi, name: 'Jens Stoltenberg' }
 ];

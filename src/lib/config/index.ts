@@ -2,6 +2,17 @@
  * Configuration exports
  */
 
+// Greenland configuration
+export {
+	GREENLAND_CONFIG,
+	GREENLAND_MAP,
+	GREENLAND_KEYWORDS,
+	ALL_GREENLAND_KEYWORDS,
+	GREENLAND_GDELT_QUERY,
+	GREENLAND_ALERT_KEYWORDS,
+	GREENLAND_TOPICS
+} from './greenland';
+
 // Panel configuration
 export {
 	PANELS,
@@ -9,6 +20,7 @@ export {
 	MAP_ZOOM_MIN,
 	MAP_ZOOM_MAX,
 	MAP_ZOOM_STEP,
+	DEFAULT_PANELS,
 	type PanelConfig,
 	type PanelId
 } from './panels';
@@ -24,6 +36,7 @@ export {
 	containsAlertKeyword,
 	detectRegion,
 	detectTopics,
+	isGreenlandRelevant,
 	type AlertKeyword
 } from './keywords';
 
@@ -61,6 +74,8 @@ export {
 	SANCTIONED_COUNTRY_IDS,
 	THREAT_COLORS,
 	WEATHER_CODES,
+	MAP_CENTER,
+	MAP_DEFAULT_ZOOM,
 	type Hotspot,
 	type ConflictZone,
 	type Chokepoint,
@@ -80,7 +95,15 @@ export {
 } from './presets';
 
 // API configuration
-export { CORS_PROXY_URL, API_DELAYS, CACHE_TTLS, DEBUG, logger, FINNHUB_API_KEY, FINNHUB_BASE_URL } from './api';
+export {
+	CORS_PROXY_URL,
+	API_DELAYS,
+	CACHE_TTLS,
+	DEBUG,
+	logger,
+	FINNHUB_API_KEY,
+	FINNHUB_BASE_URL
+} from './api';
 
 // World leaders configuration
 export { WORLD_LEADERS } from './leaders';

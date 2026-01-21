@@ -223,6 +223,9 @@
 
 		mapGroup = svg.append('g').attr('id', 'mapGroup');
 
+		// Track current zoom scale for inverse scaling
+		let currentScale = 1;
+
 		// Setup zoom - disable scroll wheel, allow touch pinch and buttons
 		zoom = d3
 			.zoom<SVGSVGElement, unknown>()
@@ -240,7 +243,56 @@
 				return true;
 			})
 			.on('zoom', (event) => {
+				currentScale = event.transform.k;
 				mapGroup.attr('transform', event.transform.toString());
+
+				// Apply inverse scaling to keep icons/labels at constant size
+				const inverseScale = 1 / currentScale;
+
+				// Scale hotspot circles and labels
+				mapGroup
+					.selectAll('circle:not(.hotspot-hit):not(.monitor-marker)')
+					.attr('r', function (this: SVGCircleElement) {
+						const el = d3.select(this);
+						const baseR = parseFloat(el.attr('data-base-r') || el.attr('r') || '3');
+						if (!el.attr('data-base-r')) {
+							el.attr('data-base-r', baseR);
+						}
+						return baseR * inverseScale;
+					});
+
+				// Scale text labels
+				mapGroup.selectAll('text').style('font-size', function (this: SVGTextElement) {
+					const el = d3.select(this);
+					const baseSize = parseFloat(el.attr('data-base-size') || el.style('font-size') || '8');
+					if (!el.attr('data-base-size')) {
+						el.attr('data-base-size', baseSize);
+					}
+					return baseSize * inverseScale + 'px';
+				});
+
+				// Scale rectangles (chokepoints)
+				mapGroup.selectAll('rect').each(function (this: SVGRectElement) {
+					const el = d3.select(this);
+					const baseW = parseFloat(el.attr('data-base-w') || el.attr('width') || '8');
+					const baseH = parseFloat(el.attr('data-base-h') || el.attr('height') || '8');
+					if (!el.attr('data-base-w')) {
+						el.attr('data-base-w', baseW);
+						el.attr('data-base-h', baseH);
+					}
+					el.attr('width', baseW * inverseScale);
+					el.attr('height', baseH * inverseScale);
+				});
+
+				// Scale hit areas for better click targeting at high zoom
+				mapGroup.selectAll('.hotspot-hit').attr('r', function (this: SVGCircleElement) {
+					const el = d3.select(this);
+					const baseR = parseFloat(el.attr('data-base-r') || el.attr('r') || '12');
+					if (!el.attr('data-base-r')) {
+						el.attr('data-base-r', baseR);
+					}
+					return baseR * inverseScale;
+				});
 			});
 
 		enableZoom();

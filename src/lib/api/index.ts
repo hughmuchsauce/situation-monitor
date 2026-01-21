@@ -10,7 +10,14 @@ export {
 	fetchCommodities,
 	fetchAllMarkets
 } from './markets';
-export { fetchPolymarket, fetchWhaleTransactions, fetchGovContracts, fetchLayoffs } from './misc';
+export {
+	fetchPolymarket,
+	fetchKalshi,
+	fetchAllPredictions,
+	fetchWhaleTransactions,
+	fetchGovContracts,
+	fetchLayoffs
+} from './misc';
 export type { Prediction, WhaleTransaction, Contract, Layoff } from './misc';
 export { fetchWorldLeaders } from './leaders';
 export { fetchFedIndicators, fetchFedNews, isFredConfigured } from './fred';

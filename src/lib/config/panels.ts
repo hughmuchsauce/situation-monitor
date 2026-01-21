@@ -1,5 +1,5 @@
 /**
- * Panel configuration
+ * Panel configuration for Greenland Situation Monitor
  */
 
 export interface PanelConfig {
@@ -25,41 +25,46 @@ export type PanelId =
 	| 'contracts'
 	| 'ai'
 	| 'layoffs'
-	| 'venezuela'
 	| 'greenland'
-	| 'iran'
 	| 'leaders'
 	| 'intel'
 	| 'correlation'
 	| 'narrative'
-	| 'fed';
+	| 'fed'
+	| 'betting';
 
 export const PANELS: Record<PanelId, PanelConfig> = {
-	map: { name: 'Global Map', priority: 1 },
-	politics: { name: 'World / Geopolitical', priority: 1 },
-	tech: { name: 'Technology / AI', priority: 1 },
-	finance: { name: 'Financial', priority: 1 },
-	gov: { name: 'Government / Policy', priority: 2 },
-	heatmap: { name: 'Sector Heatmap', priority: 1 },
-	markets: { name: 'Markets', priority: 1 },
-	monitors: { name: 'My Monitors', priority: 1 },
-	commodities: { name: 'Commodities / VIX', priority: 2 },
-	crypto: { name: 'Crypto', priority: 2 },
-	polymarket: { name: 'Polymarket', priority: 2 },
-	whales: { name: 'Whale Watch', priority: 3 },
-	mainchar: { name: 'Main Character', priority: 2 },
-	printer: { name: 'Money Printer', priority: 2 },
-	contracts: { name: 'Gov Contracts', priority: 3 },
-	ai: { name: 'AI Arms Race', priority: 3 },
-	layoffs: { name: 'Layoffs Tracker', priority: 3 },
-	venezuela: { name: 'Venezuela Situation', priority: 2 },
-	greenland: { name: 'Greenland Situation', priority: 2 },
-	iran: { name: 'Iran Situation', priority: 2 },
-	leaders: { name: 'World Leaders', priority: 1 },
-	intel: { name: 'Intel Feed', priority: 2 },
+	// Primary panels for Greenland focus
+	map: { name: 'Arctic Map', priority: 1 },
+	politics: { name: 'Greenland / Arctic News', priority: 1 },
+	greenland: { name: 'Greenland Situation', priority: 1 },
+	leaders: { name: 'Key Leaders', priority: 1 },
+	intel: { name: 'Intel Feed', priority: 1 },
 	correlation: { name: 'Correlation Engine', priority: 1 },
 	narrative: { name: 'Narrative Tracker', priority: 1 },
-	fed: { name: 'Federal Reserve', priority: 1 }
+
+	// Secondary panels
+	gov: { name: 'Government / Policy', priority: 2 },
+	monitors: { name: 'My Monitors', priority: 2 },
+	tech: { name: 'Arctic Tech / Research', priority: 2 },
+	finance: { name: 'Arctic Economy', priority: 2 },
+	mainchar: { name: 'Main Character', priority: 2 },
+
+	// Betting / Prediction Markets
+	betting: { name: 'Betting Odds', priority: 1 },
+
+	// Tertiary panels (optional/hidden by default)
+	heatmap: { name: 'Sector Heatmap', priority: 3 },
+	markets: { name: 'Markets', priority: 3 },
+	commodities: { name: 'Commodities', priority: 3 },
+	crypto: { name: 'Crypto', priority: 3 },
+	polymarket: { name: 'Polymarket', priority: 3 },
+	whales: { name: 'Whale Watch', priority: 3 },
+	printer: { name: 'Money Printer', priority: 3 },
+	contracts: { name: 'Gov Contracts', priority: 3 },
+	ai: { name: 'AI / Climate Research', priority: 3 },
+	layoffs: { name: 'Layoffs Tracker', priority: 3 },
+	fed: { name: 'Federal Reserve', priority: 3 }
 };
 
 export const NON_DRAGGABLE_PANELS: PanelId[] = ['map'];
@@ -67,3 +72,15 @@ export const NON_DRAGGABLE_PANELS: PanelId[] = ['map'];
 export const MAP_ZOOM_MIN = 1;
 export const MAP_ZOOM_MAX = 4;
 export const MAP_ZOOM_STEP = 0.5;
+
+// Default panels for Greenland focus
+export const DEFAULT_PANELS: PanelId[] = [
+	'map',
+	'betting',
+	'politics',
+	'greenland',
+	'leaders',
+	'intel',
+	'correlation',
+	'monitors'
+];

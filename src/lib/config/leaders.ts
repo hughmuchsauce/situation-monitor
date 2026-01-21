@@ -1,10 +1,68 @@
 /**
- * World Leaders configuration for tracking
+ * Leaders configuration for tracking
+ * Focused on Greenland, Denmark, Arctic nations, and key global figures
  */
 
 import type { WorldLeader } from '$lib/types';
 
 export const WORLD_LEADERS: WorldLeader[] = [
+	// Greenland
+	{
+		id: 'egede',
+		name: 'Múte Bourup Egede',
+		title: 'Premier',
+		country: 'Greenland',
+		flag: '🇬🇱',
+		keywords: ['egede', 'greenland premier', 'naalakkersuisut', 'inuit ataqatigiit'],
+		since: 'Apr 2021',
+		party: 'Inuit Ataqatigiit',
+		focus: ['independence', 'mining policy', 'danish relations']
+	},
+	{
+		id: 'broberg',
+		name: 'Vivian Motzfeldt',
+		title: 'Foreign Minister',
+		country: 'Greenland',
+		flag: '🇬🇱',
+		keywords: ['motzfeldt', 'greenland foreign', 'naalakkersuisut'],
+		since: 'Apr 2021',
+		party: 'Inuit Ataqatigiit'
+	},
+
+	// Denmark
+	{
+		id: 'frederiksen',
+		name: 'Mette Frederiksen',
+		title: 'Prime Minister',
+		country: 'Denmark',
+		flag: '🇩🇰',
+		keywords: ['frederiksen', 'danish pm', 'denmark prime minister', 'statsminister'],
+		since: 'Jun 2019',
+		party: 'Social Democrats',
+		focus: ['greenland policy', 'arctic security', 'nato']
+	},
+	{
+		id: 'frederik',
+		name: 'Frederik X',
+		title: 'King',
+		country: 'Denmark',
+		flag: '🇩🇰',
+		keywords: ['frederik', 'danish king', 'king of denmark', 'danish monarch'],
+		since: 'Jan 2024',
+		party: 'Royal Family'
+	},
+	{
+		id: 'rasmussen',
+		name: 'Lars Løkke Rasmussen',
+		title: 'Foreign Minister',
+		country: 'Denmark',
+		flag: '🇩🇰',
+		keywords: ['rasmussen', 'danish foreign minister', 'udenrigsminister'],
+		since: 'Dec 2022',
+		party: 'Moderates',
+		focus: ['arctic policy', 'greenland', 'eu relations']
+	},
+
 	// United States
 	{
 		id: 'trump',
@@ -15,7 +73,7 @@ export const WORLD_LEADERS: WorldLeader[] = [
 		keywords: ['trump', 'potus', 'white house'],
 		since: 'Jan 2025',
 		party: 'Republican',
-		focus: ['tariffs', 'immigration', 'deregulation']
+		focus: ['greenland acquisition', 'arctic', 'nato']
 	},
 	{
 		id: 'vance',
@@ -27,191 +85,62 @@ export const WORLD_LEADERS: WorldLeader[] = [
 		since: 'Jan 2025',
 		party: 'Republican'
 	},
-
-	// China
 	{
-		id: 'xi',
-		name: 'Xi Jinping',
-		title: 'President',
-		country: 'China',
-		flag: '🇨🇳',
-		keywords: ['xi jinping', 'xi', 'chinese president'],
-		since: 'Mar 2013',
-		party: 'CCP',
-		focus: ['taiwan', 'belt and road', 'tech dominance']
+		id: 'rubio',
+		name: 'Marco Rubio',
+		title: 'Secretary of State',
+		country: 'United States',
+		flag: '🇺🇸',
+		keywords: ['rubio', 'secretary of state', 'state department'],
+		since: 'Jan 2025',
+		party: 'Republican',
+		focus: ['arctic policy', 'china', 'nato']
 	},
 
-	// Russia
+	// Nordic Countries
 	{
-		id: 'putin',
-		name: 'Vladimir Putin',
-		title: 'President',
-		country: 'Russia',
-		flag: '🇷🇺',
-		keywords: ['putin', 'kremlin', 'russian president'],
-		since: 'May 2012',
-		party: 'United Russia',
-		focus: ['ukraine war', 'nato expansion', 'energy']
-	},
-
-	// Europe
-	{
-		id: 'starmer',
-		name: 'Keir Starmer',
+		id: 'jakobsdottir',
+		name: 'Katrín Jakobsdóttir',
 		title: 'Prime Minister',
-		country: 'United Kingdom',
-		flag: '🇬🇧',
-		keywords: ['starmer', 'uk pm', 'british prime minister'],
-		since: 'Jul 2024',
-		party: 'Labour'
+		country: 'Iceland',
+		flag: '🇮🇸',
+		keywords: ['jakobsdottir', 'iceland pm', 'icelandic prime minister'],
+		since: 'Nov 2017',
+		party: 'Left-Green Movement',
+		focus: ['arctic council', 'nato', 'climate']
 	},
 	{
-		id: 'macron',
-		name: 'Emmanuel Macron',
-		title: 'President',
-		country: 'France',
-		flag: '🇫🇷',
-		keywords: ['macron', 'french president', 'elysee'],
-		since: 'May 2017',
-		party: 'Renaissance'
-	},
-	{
-		id: 'scholz',
-		name: 'Olaf Scholz',
-		title: 'Chancellor',
-		country: 'Germany',
-		flag: '🇩🇪',
-		keywords: ['scholz', 'german chancellor', 'berlin'],
-		since: 'Dec 2021',
-		party: 'SPD'
-	},
-	{
-		id: 'meloni',
-		name: 'Giorgia Meloni',
+		id: 'store',
+		name: 'Jonas Gahr Støre',
 		title: 'Prime Minister',
-		country: 'Italy',
-		flag: '🇮🇹',
-		keywords: ['meloni', 'italian pm', 'italy prime minister'],
+		country: 'Norway',
+		flag: '🇳🇴',
+		keywords: ['store', 'støre', 'norway pm', 'norwegian prime minister'],
+		since: 'Oct 2021',
+		party: 'Labour Party',
+		focus: ['arctic', 'nato', 'energy']
+	},
+	{
+		id: 'kristersson',
+		name: 'Ulf Kristersson',
+		title: 'Prime Minister',
+		country: 'Sweden',
+		flag: '🇸🇪',
+		keywords: ['kristersson', 'sweden pm', 'swedish prime minister'],
 		since: 'Oct 2022',
-		party: 'Brothers of Italy'
+		party: 'Moderate Party',
+		focus: ['nato', 'arctic', 'defense']
 	},
-
-	// Middle East
 	{
-		id: 'netanyahu',
-		name: 'Benjamin Netanyahu',
+		id: 'orpo',
+		name: 'Petteri Orpo',
 		title: 'Prime Minister',
-		country: 'Israel',
-		flag: '🇮🇱',
-		keywords: ['netanyahu', 'bibi', 'israeli pm'],
-		since: 'Dec 2022',
-		party: 'Likud',
-		focus: ['gaza', 'iran', 'judicial reform']
-	},
-	{
-		id: 'mbs',
-		name: 'Mohammed bin Salman',
-		title: 'Crown Prince',
-		country: 'Saudi Arabia',
-		flag: '🇸🇦',
-		keywords: ['mbs', 'saudi crown prince', 'bin salman'],
-		since: 'Jun 2017',
-		party: 'Royal Family',
-		focus: ['vision 2030', 'oil', 'regional influence']
-	},
-	{
-		id: 'khamenei',
-		name: 'Ali Khamenei',
-		title: 'Supreme Leader',
-		country: 'Iran',
-		flag: '🇮🇷',
-		keywords: ['khamenei', 'supreme leader', 'ayatollah'],
-		since: 'Jun 1989',
-		party: 'Islamic Republic',
-		focus: ['nuclear program', 'proxies', 'sanctions']
-	},
-
-	// Asia-Pacific
-	{
-		id: 'modi',
-		name: 'Narendra Modi',
-		title: 'Prime Minister',
-		country: 'India',
-		flag: '🇮🇳',
-		keywords: ['modi', 'indian pm', 'india prime minister'],
-		since: 'May 2014',
-		party: 'BJP',
-		focus: ['economy', 'china border', 'technology']
-	},
-	{
-		id: 'kim',
-		name: 'Kim Jong Un',
-		title: 'Supreme Leader',
-		country: 'North Korea',
-		flag: '🇰🇵',
-		keywords: ['kim jong un', 'north korea', 'pyongyang'],
-		since: 'Dec 2011',
-		party: 'Workers Party',
-		focus: ['nuclear', 'missiles', 'russia alliance']
-	},
-	{
-		id: 'ishiba',
-		name: 'Shigeru Ishiba',
-		title: 'Prime Minister',
-		country: 'Japan',
-		flag: '🇯🇵',
-		keywords: ['ishiba', 'japanese pm', 'japan prime minister'],
-		since: 'Oct 2024',
-		party: 'LDP',
-		focus: ['defense', 'china', 'us alliance']
-	},
-	{
-		id: 'lai',
-		name: 'Lai Ching-te',
-		title: 'President',
-		country: 'Taiwan',
-		flag: '🇹🇼',
-		keywords: ['lai ching-te', 'taiwan president', 'taipei'],
-		since: 'May 2024',
-		party: 'DPP',
-		focus: ['china relations', 'defense', 'semiconductors']
-	},
-
-	// Ukraine
-	{
-		id: 'zelensky',
-		name: 'Volodymyr Zelensky',
-		title: 'President',
-		country: 'Ukraine',
-		flag: '🇺🇦',
-		keywords: ['zelensky', 'ukraine president', 'kyiv'],
-		since: 'May 2019',
-		party: 'Servant of the People',
-		focus: ['war', 'western aid', 'nato membership']
-	},
-
-	// Latin America
-	{
-		id: 'milei',
-		name: 'Javier Milei',
-		title: 'President',
-		country: 'Argentina',
-		flag: '🇦🇷',
-		keywords: ['milei', 'argentina president', 'buenos aires'],
-		since: 'Dec 2023',
-		party: 'La Libertad Avanza',
-		focus: ['dollarization', 'spending cuts', 'deregulation']
-	},
-	{
-		id: 'lula',
-		name: 'Luiz Inácio Lula da Silva',
-		title: 'President',
-		country: 'Brazil',
-		flag: '🇧🇷',
-		keywords: ['lula', 'brazil president', 'brasilia'],
-		since: 'Jan 2023',
-		party: 'PT',
-		focus: ['amazon', 'social programs', 'brics']
+		country: 'Finland',
+		flag: '🇫🇮',
+		keywords: ['orpo', 'finland pm', 'finnish prime minister'],
+		since: 'Jun 2023',
+		party: 'National Coalition',
+		focus: ['nato', 'arctic', 'russia border']
 	},
 
 	// Canada
@@ -224,6 +153,32 @@ export const WORLD_LEADERS: WorldLeader[] = [
 		keywords: ['carney', 'canadian pm', 'canada prime minister', 'ottawa'],
 		since: 'Mar 2025',
 		party: 'Liberal',
-		focus: ['tariffs', 'us relations', 'economy']
+		focus: ['arctic sovereignty', 'northwest passage', 'us relations']
+	},
+
+	// Russia (Arctic neighbor)
+	{
+		id: 'putin',
+		name: 'Vladimir Putin',
+		title: 'President',
+		country: 'Russia',
+		flag: '🇷🇺',
+		keywords: ['putin', 'kremlin', 'russian president'],
+		since: 'May 2012',
+		party: 'United Russia',
+		focus: ['arctic militarization', 'northern sea route', 'resources']
+	},
+
+	// China (Arctic interests)
+	{
+		id: 'xi',
+		name: 'Xi Jinping',
+		title: 'President',
+		country: 'China',
+		flag: '🇨🇳',
+		keywords: ['xi jinping', 'xi', 'chinese president'],
+		since: 'Mar 2013',
+		party: 'CCP',
+		focus: ['polar silk road', 'arctic shipping', 'rare earth']
 	}
 ];

@@ -1,6 +1,7 @@
 {
-	"name": "situation-monitor",
-	"version": "2.0.0",
+	"name": "greenland-monitor",
+	"version": "1.0.0",
+	"description": "Real-time intelligence dashboard for Greenland, the Arctic, and Danish relations",
 	"private": true,
 	"type": "module",
 	"scripts": {

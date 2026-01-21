@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Header, Dashboard } from '$lib/components/layout';
+	import { Header } from '$lib/components/layout';
 	import { SettingsModal, MonitorFormModal, OnboardingModal } from '$lib/components/modals';
 	import {
 		NewsPanel,
@@ -13,15 +13,12 @@
 		NarrativePanel,
 		MonitorsPanel,
 		MapPanel,
-		WhalePanel,
-		PolymarketPanel,
-		ContractsPanel,
-		LayoffsPanel,
 		IntelPanel,
 		SituationPanel,
 		WorldLeadersPanel,
-		PrinterPanel,
-		FedPanel
+		FedPanel,
+		LiveFeedPanel,
+		BettingOddsPanel
 	} from '$lib/components/panels';
 	import {
 		news,
@@ -36,15 +33,10 @@
 	import {
 		fetchAllNews,
 		fetchAllMarkets,
-		fetchPolymarket,
-		fetchWhaleTransactions,
-		fetchGovContracts,
-		fetchLayoffs,
 		fetchWorldLeaders,
 		fetchFedIndicators,
 		fetchFedNews
 	} from '$lib/api';
-	import type { Prediction, WhaleTransaction, Contract, Layoff } from '$lib/api';
 	import type { CustomMonitor, WorldLeader } from '$lib/types';
 	import type { PanelId } from '$lib/config';
 
@@ -54,17 +46,12 @@
 	let onboardingOpen = $state(false);
 	let editingMonitor = $state<CustomMonitor | null>(null);
 
-	// Misc panel data
-	let predictions = $state<Prediction[]>([]);
-	let whales = $state<WhaleTransaction[]>([]);
-	let contracts = $state<Contract[]>([]);
-	let layoffs = $state<Layoff[]>([]);
+	// Panel data
 	let leaders = $state<WorldLeader[]>([]);
 	let leadersLoading = $state(false);
 
 	// Data fetching
 	async function loadNews() {
-		// Set loading for all categories
 		const categories = ['politics', 'tech', 'finance', 'gov', 'ai', 'intel'] as const;
 		categories.forEach((cat) => news.setLoading(cat, true));
 
@@ -87,23 +74,6 @@
 			markets.setCrypto(data.crypto);
 		} catch (error) {
 			console.error('Failed to load markets:', error);
-		}
-	}
-
-	async function loadMiscData() {
-		try {
-			const [predictionsData, whalesData, contractsData, layoffsData] = await Promise.all([
-				fetchPolymarket(),
-				fetchWhaleTransactions(),
-				fetchGovContracts(),
-				fetchLayoffs()
-			]);
-			predictions = predictionsData;
-			whales = whalesData;
-			contracts = contractsData;
-			layoffs = layoffsData;
-		} catch (error) {
-			console.error('Failed to load misc data:', error);
 		}
 	}
 
@@ -173,7 +143,6 @@
 	function handleSelectPreset(presetId: string) {
 		settings.applyPreset(presetId);
 		onboardingOpen = false;
-		// Refresh data after applying preset
 		handleRefresh();
 	}
 
@@ -186,22 +155,14 @@
 
 	// Initial load
 	onMount(() => {
-		// Check if first visit
 		if (!settings.isOnboardingComplete()) {
 			onboardingOpen = true;
 		}
 
-		// Load initial data and track as refresh
 		async function initialLoad() {
 			refresh.startRefresh();
 			try {
-				await Promise.all([
-					loadNews(),
-					loadMarkets(),
-					loadMiscData(),
-					loadWorldLeaders(),
-					loadFedData()
-				]);
+				await Promise.all([loadNews(), loadMarkets(), loadWorldLeaders(), loadFedData()]);
 				refresh.endRefresh();
 			} catch (error) {
 				refresh.endRefresh([String(error)]);
@@ -217,231 +178,185 @@
 </script>
 
 <svelte:head>
-	<title>Situation Monitor</title>
-	<meta name="description" content="Real-time global situation monitoring dashboard" />
+	<title>Greenland Situation Monitor</title>
+	<meta
+		name="description"
+		content="Real-time intelligence on Greenland, the Arctic, and Danish relations"
+	/>
 </svelte:head>
 
 <div class="app">
 	<Header onSettingsClick={() => (settingsOpen = true)} />
 
-	<main class="main-content">
-		<Dashboard>
-			<!-- Map Panel - Full width -->
-			{#if isPanelVisible('map')}
-				<div class="panel-slot map-slot">
+	<main class="main-layout">
+		<!-- Top Section: Map + Live Feed -->
+		<div class="top-section">
+			<!-- Map Panel - Left Side -->
+			<div class="map-container">
+				{#if isPanelVisible('map')}
 					<MapPanel monitors={$monitors.monitors} />
-				</div>
-			{/if}
+				{/if}
+			</div>
 
-			<!-- News Panels -->
-			{#if isPanelVisible('politics')}
-				<div class="panel-slot">
-					<NewsPanel category="politics" panelId="politics" title="Politics" />
-				</div>
-			{/if}
+			<!-- Live Feed - Right Side -->
+			<div class="feed-container">
+				<LiveFeedPanel />
+			</div>
+		</div>
 
-			{#if isPanelVisible('tech')}
-				<div class="panel-slot">
-					<NewsPanel category="tech" panelId="tech" title="Tech" />
-				</div>
-			{/if}
+		<!-- Betting Odds Section - Below Map -->
+		{#if isPanelVisible('betting')}
+			<div class="betting-section">
+				<BettingOddsPanel />
+			</div>
+		{/if}
 
-			{#if isPanelVisible('finance')}
-				<div class="panel-slot">
-					<NewsPanel category="finance" panelId="finance" title="Finance" />
-				</div>
-			{/if}
+		<!-- Bottom Section: All Other Panels -->
+		<div class="bottom-section">
+			<div class="panels-grid">
+				<!-- Greenland Situation Panel -->
+				{#if isPanelVisible('greenland')}
+					<div class="panel-slot">
+						<SituationPanel
+							panelId="greenland"
+							config={{
+								title: 'Greenland Watch',
+								subtitle: 'Arctic geopolitics, sovereignty & strategic interests',
+								criticalKeywords: [
+									'greenland',
+									'arctic',
+									'nuuk',
+									'denmark',
+									'pituffik',
+									'thule',
+									'independence',
+									'acquisition',
+									'nato',
+									'rare earth'
+								]
+							}}
+							news={$allNewsItems.filter(
+								(n) =>
+									n.title.toLowerCase().includes('greenland') ||
+									n.title.toLowerCase().includes('arctic') ||
+									n.title.toLowerCase().includes('nuuk') ||
+									n.title.toLowerCase().includes('denmark')
+							)}
+						/>
+					</div>
+				{/if}
 
-			{#if isPanelVisible('gov')}
-				<div class="panel-slot">
-					<NewsPanel category="gov" panelId="gov" title="Government" />
-				</div>
-			{/if}
+				<!-- World Leaders Panel -->
+				{#if isPanelVisible('leaders')}
+					<div class="panel-slot">
+						<WorldLeadersPanel {leaders} loading={leadersLoading} />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('ai')}
-				<div class="panel-slot">
-					<NewsPanel category="ai" panelId="ai" title="AI" />
-				</div>
-			{/if}
+				<!-- News Panels -->
+				{#if isPanelVisible('politics')}
+					<div class="panel-slot">
+						<NewsPanel category="politics" panelId="politics" title="Politics" />
+					</div>
+				{/if}
 
-			<!-- Markets Panels -->
-			{#if isPanelVisible('markets')}
-				<div class="panel-slot">
-					<MarketsPanel />
-				</div>
-			{/if}
+				{#if isPanelVisible('tech')}
+					<div class="panel-slot">
+						<NewsPanel category="tech" panelId="tech" title="Tech" />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('heatmap')}
-				<div class="panel-slot">
-					<HeatmapPanel />
-				</div>
-			{/if}
+				{#if isPanelVisible('finance')}
+					<div class="panel-slot">
+						<NewsPanel category="finance" panelId="finance" title="Finance" />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('commodities')}
-				<div class="panel-slot">
-					<CommoditiesPanel />
-				</div>
-			{/if}
+				{#if isPanelVisible('gov')}
+					<div class="panel-slot">
+						<NewsPanel category="gov" panelId="gov" title="Government" />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('crypto')}
-				<div class="panel-slot">
-					<CryptoPanel />
-				</div>
-			{/if}
+				{#if isPanelVisible('ai')}
+					<div class="panel-slot">
+						<NewsPanel category="ai" panelId="ai" title="AI" />
+					</div>
+				{/if}
 
-			<!-- Analysis Panels -->
-			{#if isPanelVisible('mainchar')}
-				<div class="panel-slot">
-					<MainCharPanel />
-				</div>
-			{/if}
+				<!-- Markets Panels -->
+				{#if isPanelVisible('markets')}
+					<div class="panel-slot">
+						<MarketsPanel />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('correlation')}
-				<div class="panel-slot">
-					<CorrelationPanel news={$allNewsItems} />
-				</div>
-			{/if}
+				{#if isPanelVisible('heatmap')}
+					<div class="panel-slot">
+						<HeatmapPanel />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('narrative')}
-				<div class="panel-slot">
-					<NarrativePanel news={$allNewsItems} />
-				</div>
-			{/if}
+				{#if isPanelVisible('commodities')}
+					<div class="panel-slot">
+						<CommoditiesPanel />
+					</div>
+				{/if}
 
-			<!-- Intel Panel -->
-			{#if isPanelVisible('intel')}
-				<div class="panel-slot">
-					<IntelPanel />
-				</div>
-			{/if}
+				{#if isPanelVisible('crypto')}
+					<div class="panel-slot">
+						<CryptoPanel />
+					</div>
+				{/if}
 
-			<!-- Fed Panel -->
-			{#if isPanelVisible('fed')}
-				<div class="panel-slot">
-					<FedPanel />
-				</div>
-			{/if}
+				<!-- Analysis Panels -->
+				{#if isPanelVisible('mainchar')}
+					<div class="panel-slot">
+						<MainCharPanel />
+					</div>
+				{/if}
 
-			<!-- World Leaders Panel -->
-			{#if isPanelVisible('leaders')}
-				<div class="panel-slot">
-					<WorldLeadersPanel {leaders} loading={leadersLoading} />
-				</div>
-			{/if}
+				{#if isPanelVisible('correlation')}
+					<div class="panel-slot">
+						<CorrelationPanel news={$allNewsItems} />
+					</div>
+				{/if}
 
-			<!-- Situation Panels -->
-			{#if isPanelVisible('venezuela')}
-				<div class="panel-slot">
-					<SituationPanel
-						panelId="venezuela"
-						config={{
-							title: 'Venezuela Watch',
-							subtitle: 'Humanitarian crisis monitoring',
-							criticalKeywords: ['maduro', 'caracas', 'venezuela', 'guaido']
-						}}
-						news={$allNewsItems.filter(
-							(n) =>
-								n.title.toLowerCase().includes('venezuela') ||
-								n.title.toLowerCase().includes('maduro')
-						)}
-					/>
-				</div>
-			{/if}
+				{#if isPanelVisible('narrative')}
+					<div class="panel-slot">
+						<NarrativePanel news={$allNewsItems} />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('greenland')}
-				<div class="panel-slot">
-					<SituationPanel
-						panelId="greenland"
-						config={{
-							title: 'Greenland Watch',
-							subtitle: 'Arctic geopolitics monitoring',
-							criticalKeywords: ['greenland', 'arctic', 'nuuk', 'denmark']
-						}}
-						news={$allNewsItems.filter(
-							(n) =>
-								n.title.toLowerCase().includes('greenland') ||
-								n.title.toLowerCase().includes('arctic')
-						)}
-					/>
-				</div>
-			{/if}
+				<!-- Intel Panel -->
+				{#if isPanelVisible('intel')}
+					<div class="panel-slot">
+						<IntelPanel />
+					</div>
+				{/if}
 
-			{#if isPanelVisible('iran')}
-				<div class="panel-slot">
-					<SituationPanel
-						panelId="iran"
-						config={{
-							title: 'Iran Crisis',
-							subtitle: 'Revolution protests, regime instability & nuclear program',
-							criticalKeywords: [
-								'protest',
-								'uprising',
-								'revolution',
-								'crackdown',
-								'killed',
-								'nuclear',
-								'strike',
-								'attack',
-								'irgc',
-								'khamenei'
-							]
-						}}
-						news={$allNewsItems.filter(
-							(n) =>
-								n.title.toLowerCase().includes('iran') ||
-								n.title.toLowerCase().includes('tehran') ||
-								n.title.toLowerCase().includes('irgc')
-						)}
-					/>
-				</div>
-			{/if}
+				<!-- Fed Panel -->
+				{#if isPanelVisible('fed')}
+					<div class="panel-slot">
+						<FedPanel />
+					</div>
+				{/if}
 
-			<!-- Placeholder panels for additional data sources -->
-			{#if isPanelVisible('whales')}
-				<div class="panel-slot">
-					<WhalePanel {whales} />
-				</div>
-			{/if}
-
-			{#if isPanelVisible('polymarket')}
-				<div class="panel-slot">
-					<PolymarketPanel {predictions} />
-				</div>
-			{/if}
-
-			{#if isPanelVisible('contracts')}
-				<div class="panel-slot">
-					<ContractsPanel {contracts} />
-				</div>
-			{/if}
-
-			{#if isPanelVisible('layoffs')}
-				<div class="panel-slot">
-					<LayoffsPanel {layoffs} />
-				</div>
-			{/if}
-
-			<!-- Money Printer Panel -->
-			{#if isPanelVisible('printer')}
-				<div class="panel-slot">
-					<PrinterPanel />
-				</div>
-			{/if}
-
-			<!-- Custom Monitors (always last) -->
-			{#if isPanelVisible('monitors')}
-				<div class="panel-slot">
-					<MonitorsPanel
-						monitors={$monitors.monitors}
-						matches={$monitors.matches}
-						onCreateMonitor={handleCreateMonitor}
-						onEditMonitor={handleEditMonitor}
-						onDeleteMonitor={handleDeleteMonitor}
-						onToggleMonitor={handleToggleMonitor}
-					/>
-				</div>
-			{/if}
-		</Dashboard>
+				<!-- Custom Monitors -->
+				{#if isPanelVisible('monitors')}
+					<div class="panel-slot">
+						<MonitorsPanel
+							monitors={$monitors.monitors}
+							matches={$monitors.matches}
+							onCreateMonitor={handleCreateMonitor}
+							onEditMonitor={handleEditMonitor}
+							onDeleteMonitor={handleDeleteMonitor}
+							onToggleMonitor={handleToggleMonitor}
+						/>
+					</div>
+				{/if}
+			</div>
+		</div>
 	</main>
 
 	<!-- Modals -->
@@ -466,20 +381,114 @@
 		background: var(--bg);
 	}
 
-	.main-content {
+	.main-layout {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
 		padding: 0.5rem;
+		gap: 0.5rem;
+		overflow: hidden;
+	}
+
+	/* Top Section: Map + Live Feed side by side */
+	.top-section {
+		display: flex;
+		gap: 0.5rem;
+		height: 55vh;
+		min-height: 400px;
+	}
+
+	.map-container {
+		flex: 2;
+		min-width: 0;
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	.map-container :global(.panel) {
+		height: 100%;
+	}
+
+	.map-container :global(.panel-content) {
+		height: calc(100% - 2.5rem);
+	}
+
+	.feed-container {
+		flex: 1;
+		min-width: 300px;
+		max-width: 400px;
+		position: relative;
+	}
+
+	/* Betting Section */
+	.betting-section {
+		width: 100%;
+	}
+
+	.betting-section :global(.panel) {
+		max-height: 300px;
+	}
+
+	/* Bottom Section: Panel Grid */
+	.bottom-section {
+		flex: 1;
 		overflow-y: auto;
+		min-height: 200px;
 	}
 
-	.map-slot {
-		column-span: all;
-		margin-bottom: 0.5rem;
+	.panels-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 0.5rem;
 	}
 
-	@media (max-width: 768px) {
-		.main-content {
+	.panel-slot {
+		min-height: 200px;
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 1200px) {
+		.top-section {
+			height: 50vh;
+		}
+
+		.feed-container {
+			max-width: 350px;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.top-section {
+			flex-direction: column;
+			height: auto;
+		}
+
+		.map-container {
+			height: 400px;
+		}
+
+		.feed-container {
+			max-width: none;
+			height: 350px;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.main-layout {
 			padding: 0.25rem;
+		}
+
+		.map-container {
+			height: 300px;
+		}
+
+		.feed-container {
+			height: 300px;
+			min-width: auto;
+		}
+
+		.panels-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

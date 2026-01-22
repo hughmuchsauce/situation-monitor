@@ -73,9 +73,9 @@
 								class="source-badge"
 								style="background-color: {getSourceColor(prediction.source)}"
 							>
-								{prediction.source === 'polymarket' ? 'PM' : 'K'}
+								{prediction.source === 'polymarket' ? 'Polymarket' : 'Kalshi'}
 							</span>
-							<span class="volume">${prediction.volume}</span>
+							<span class="volume">{prediction.volumeDisplay} volume</span>
 						</div>
 						<div class="prediction-question">{prediction.question}</div>
 						<div class="prediction-odds">
@@ -160,12 +160,12 @@
 	}
 
 	.source-badge {
-		font-size: 0.65rem;
-		font-weight: 700;
-		padding: 0.15rem 0.4rem;
-		border-radius: 3px;
+		font-size: 0.6rem;
+		font-weight: 600;
+		padding: 0.2rem 0.5rem;
+		border-radius: 4px;
 		color: white;
-		text-transform: uppercase;
+		letter-spacing: 0.02em;
 	}
 
 	.volume {

@@ -1,13 +1,15 @@
 /**
  * Miscellaneous API functions for specialized panels
  * Prediction market data from Polymarket and Kalshi
+ * Filtered to only show Greenland-related markets
  */
 
 export interface Prediction {
 	id: string;
 	question: string;
 	yes: number;
-	volume: string;
+	volume: number; // Raw number for sorting
+	volumeDisplay: string; // Formatted for display
 	source: 'polymarket' | 'kalshi';
 	url?: string;
 }
@@ -35,12 +37,12 @@ export interface Layoff {
 
 /**
  * Fetch Polymarket predictions via their CLOB API
- * This endpoint has CORS enabled
+ * Only returns markets mentioning "greenland"
  */
 export async function fetchPolymarket(): Promise<Prediction[]> {
 	try {
 		// Use the CLOB API which has better CORS support
-		const response = await fetch('https://clob.polymarket.com/markets?closed=false&limit=50', {
+		const response = await fetch('https://clob.polymarket.com/markets?closed=false&limit=100', {
 			headers: {
 				Accept: 'application/json'
 			}
@@ -54,30 +56,13 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 		const data = await response.json();
 		const markets = data.data || data || [];
 
-		// Filter for relevant topics
-		const relevantKeywords = [
-			'greenland',
-			'arctic',
-			'denmark',
-			'trump',
-			'nato',
-			'russia',
-			'china',
-			'military',
-			'territory',
-			'president',
-			'war',
-			'ukraine',
-			'biden',
-			'election'
-		];
+		// Only filter for Greenland
+		const filtered = markets.filter((market: { question?: string; description?: string }) => {
+			const text = ((market.question || '') + ' ' + (market.description || '')).toLowerCase();
+			return text.includes('greenland');
+		});
 
-		const filtered = markets
-			.filter((market: { question?: string; description?: string }) => {
-				const text = ((market.question || '') + ' ' + (market.description || '')).toLowerCase();
-				return relevantKeywords.some((kw) => text.includes(kw));
-			})
-			.slice(0, 20);
+		console.log(`Polymarket: Found ${filtered.length} Greenland markets out of ${markets.length} total`);
 
 		return filtered.map(
 			(market: {
@@ -92,11 +77,14 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 					yesPrice = Math.round(market.tokens[0].price * 100);
 				}
 
+				const vol = market.volume || 0;
+
 				return {
 					id: `pm-${market.condition_id || Math.random().toString(36)}`,
 					question: market.question || 'Unknown market',
 					yes: yesPrice,
-					volume: formatVolume(market.volume || 0),
+					volume: vol,
+					volumeDisplay: formatVolume(vol),
 					source: 'polymarket' as const,
 					url: market.market_slug
 						? `https://polymarket.com/event/${market.market_slug}`
@@ -112,12 +100,12 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 
 /**
  * Fetch Kalshi predictions
- * Try multiple endpoints
+ * Only returns markets mentioning "greenland"
  */
 export async function fetchKalshi(): Promise<Prediction[]> {
 	const endpoints = [
-		'https://api.elections.kalshi.com/trade-api/v2/markets?limit=50&status=open',
-		'https://trading-api.kalshi.com/trade-api/v2/markets?limit=50&status=open'
+		'https://api.elections.kalshi.com/trade-api/v2/markets?limit=100&status=open',
+		'https://trading-api.kalshi.com/trade-api/v2/markets?limit=100&status=open'
 	];
 
 	for (const endpoint of endpoints) {
@@ -155,44 +143,35 @@ function processKalshiMarkets(
 		volume?: number;
 	}>
 ): Prediction[] {
-	const relevantKeywords = [
-		'greenland',
-		'arctic',
-		'denmark',
-		'trump',
-		'nato',
-		'russia',
-		'china',
-		'territory',
-		'president',
-		'war',
-		'ukraine',
-		'biden',
-		'election'
-	];
+	// Only filter for Greenland
+	const filtered = markets.filter((market) => {
+		const title = (market.title || '').toLowerCase();
+		return title.includes('greenland');
+	});
 
-	const filtered = markets
-		.filter((market) => {
-			const title = (market.title || '').toLowerCase();
-			return relevantKeywords.some((kw) => title.includes(kw));
-		})
-		.slice(0, 20);
+	console.log(`Kalshi: Found ${filtered.length} Greenland markets out of ${markets.length} total`);
 
-	return filtered.map((market) => ({
-		id: `kalshi-${market.ticker || Math.random().toString(36)}`,
-		question: market.title || 'Unknown market',
-		yes: Math.round((market.yes_ask || market.yes_bid || 0.5) * 100),
-		volume: formatVolume(market.volume || 0),
-		source: 'kalshi' as const,
-		url: market.ticker ? `https://kalshi.com/markets/${market.ticker}` : 'https://kalshi.com'
-	}));
+	return filtered.map((market) => {
+		const vol = market.volume || 0;
+
+		return {
+			id: `kalshi-${market.ticker || Math.random().toString(36)}`,
+			question: market.title || 'Unknown market',
+			yes: Math.round((market.yes_ask || market.yes_bid || 0.5) * 100),
+			volume: vol,
+			volumeDisplay: formatVolume(vol),
+			source: 'kalshi' as const,
+			url: market.ticker ? `https://kalshi.com/markets/${market.ticker}` : 'https://kalshi.com'
+		};
+	});
 }
 
 /**
  * Fetch all prediction market data from both sources
+ * Sorted by volume (highest first)
  */
 export async function fetchAllPredictions(): Promise<Prediction[]> {
-	console.log('Fetching predictions from Polymarket and Kalshi...');
+	console.log('Fetching Greenland predictions from Polymarket and Kalshi...');
 
 	const results = await Promise.allSettled([fetchPolymarket(), fetchKalshi()]);
 
@@ -201,32 +180,21 @@ export async function fetchAllPredictions(): Promise<Prediction[]> {
 
 	console.log(`Got ${polymarket.length} from Polymarket, ${kalshi.length} from Kalshi`);
 
-	// Combine and sort by volume
-	const combined = [...polymarket, ...kalshi].sort((a, b) => {
-		const volA = parseVolume(a.volume);
-		const volB = parseVolume(b.volume);
-		return volB - volA;
-	});
+	// Combine and sort by volume (highest first)
+	const combined = [...polymarket, ...kalshi].sort((a, b) => b.volume - a.volume);
 
 	return combined;
 }
 
 function formatVolume(volume: number): string {
 	if (volume >= 1000000) {
-		return `${(volume / 1000000).toFixed(1)}M`;
+		return `$${(volume / 1000000).toFixed(1)}M`;
 	} else if (volume >= 1000) {
-		return `${(volume / 1000).toFixed(0)}K`;
+		return `$${(volume / 1000).toFixed(0)}K`;
+	} else if (volume > 0) {
+		return `$${volume.toFixed(0)}`;
 	}
-	return volume.toString();
-}
-
-function parseVolume(vol: string): number {
-	if (vol.endsWith('M')) {
-		return parseFloat(vol) * 1000000;
-	} else if (vol.endsWith('K')) {
-		return parseFloat(vol) * 1000;
-	}
-	return parseFloat(vol) || 0;
+	return '$0';
 }
 
 /**

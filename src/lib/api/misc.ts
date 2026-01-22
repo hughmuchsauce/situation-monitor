@@ -3,6 +3,8 @@
  * Uses real APIs where available, returns empty arrays where APIs require authentication
  */
 
+import { CORS_PROXIES } from '$lib/config/api';
+
 export interface Prediction {
 	id: string;
 	question: string;
@@ -34,13 +36,33 @@ export interface Layoff {
 }
 
 /**
+ * Fetch with CORS proxy
+ */
+async function fetchWithCors(url: string): Promise<Response> {
+	// Try primary proxy first
+	try {
+		const response = await fetch(CORS_PROXIES.primary + encodeURIComponent(url));
+		if (response.ok) {
+			return response;
+		}
+	} catch {
+		// Fall through to fallback
+	}
+
+	// Fallback proxy
+	return fetch(CORS_PROXIES.fallback + encodeURIComponent(url));
+}
+
+/**
  * Fetch Polymarket predictions via their public Gamma API
  * Filters for Greenland and Arctic related markets
  */
 export async function fetchPolymarket(): Promise<Prediction[]> {
 	try {
 		// Polymarket Gamma API - public endpoint for market data
-		const response = await fetch('https://gamma-api.polymarket.com/markets?closed=false&limit=100');
+		const response = await fetchWithCors(
+			'https://gamma-api.polymarket.com/markets?closed=false&limit=100'
+		);
 
 		if (!response.ok) {
 			console.warn('Polymarket API returned non-OK status:', response.status);
@@ -60,15 +82,18 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 			'china',
 			'military',
 			'territory',
-			'acquisition'
+			'acquisition',
+			'president',
+			'war',
+			'ukraine'
 		];
 
 		const filtered = markets
 			.filter((market: { question: string }) => {
-				const q = market.question.toLowerCase();
+				const q = (market.question || '').toLowerCase();
 				return relevantKeywords.some((kw) => q.includes(kw));
 			})
-			.slice(0, 10);
+			.slice(0, 15);
 
 		return filtered.map(
 			(market: {
@@ -110,21 +135,13 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 export async function fetchKalshi(): Promise<Prediction[]> {
 	try {
 		// Kalshi public API for market data
-		const response = await fetch(
+		const response = await fetchWithCors(
 			'https://api.elections.kalshi.com/trade-api/v2/markets?limit=100&status=open'
 		);
 
 		if (!response.ok) {
-			// Try alternative endpoint
-			const altResponse = await fetch(
-				'https://trading-api.kalshi.com/trade-api/v2/markets?limit=100&status=open'
-			);
-			if (!altResponse.ok) {
-				console.warn('Kalshi API returned non-OK status');
-				return [];
-			}
-			const altData = await altResponse.json();
-			return processKalshiMarkets(altData.markets || []);
+			console.warn('Kalshi API returned non-OK status:', response.status);
+			return [];
 		}
 
 		const data = await response.json();
@@ -151,15 +168,18 @@ function processKalshiMarkets(
 		'nato',
 		'russia',
 		'china',
-		'territory'
+		'territory',
+		'president',
+		'war',
+		'ukraine'
 	];
 
 	const filtered = markets
 		.filter((market) => {
-			const title = market.title.toLowerCase();
+			const title = (market.title || '').toLowerCase();
 			return relevantKeywords.some((kw) => title.includes(kw));
 		})
-		.slice(0, 10);
+		.slice(0, 15);
 
 	return filtered.map((market) => ({
 		id: `kalshi-${market.ticker}`,

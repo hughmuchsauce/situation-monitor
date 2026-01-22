@@ -34,7 +34,7 @@
 				<button class="close-btn" onclick={handleClose} aria-label="Skip onboarding">
 					&times;
 				</button>
-				<h2>Welcome to Situation Monitor</h2>
+				<h2>Welcome to Greenland Monitor</h2>
 				<p class="subtitle">Choose a dashboard configuration to get started</p>
 			</div>
 

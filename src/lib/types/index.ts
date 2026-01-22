@@ -1,4 +1,4 @@
-// Core data types for Situation Monitor
+// Core data types for Greenland Monitor
 
 /**
  * News feed category

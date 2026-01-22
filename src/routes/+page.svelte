@@ -49,7 +49,7 @@
 	<Header onSettingsClick={() => (settingsOpen = true)} />
 
 	<main class="main-layout">
-		<!-- Top Section: Map + Betting Odds -->
+		<!-- Top Section: Map + Live Feed placeholder -->
 		<div class="top-section">
 			<!-- Map Panel - Left Side -->
 			<div class="map-container">
@@ -58,10 +58,19 @@
 				{/if}
 			</div>
 
-			<!-- Betting Odds - Right Side -->
-			<div class="betting-container">
-				<BettingOddsPanel />
+			<!-- Right Side - Reserved for Live Feed -->
+			<div class="feed-placeholder">
+				<div class="placeholder-content">
+					<span class="placeholder-icon">📡</span>
+					<span class="placeholder-text">Live Feed</span>
+					<span class="placeholder-subtext">Coming Soon</span>
+				</div>
 			</div>
+		</div>
+
+		<!-- Bottom Section: Betting Odds -->
+		<div class="bottom-section">
+			<BettingOddsPanel />
 		</div>
 	</main>
 
@@ -91,7 +100,7 @@
 		overflow: hidden;
 	}
 
-	/* Top Section: Map + Betting Odds side by side */
+	/* Top Section: Map + Feed placeholder */
 	.top-section {
 		display: flex;
 		gap: 0.5rem;
@@ -114,17 +123,54 @@
 		height: calc(100% - 2.5rem);
 	}
 
-	.betting-container {
+	.feed-placeholder {
 		flex: 1;
-		min-width: 350px;
-		max-width: 500px;
+		min-width: 300px;
+		max-width: 400px;
+		background: var(--surface, #0d1117);
+		border: 1px dashed var(--border, #30363d);
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.betting-container :global(.panel) {
+	.placeholder-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--text-muted, #7d8590);
+	}
+
+	.placeholder-icon {
+		font-size: 2rem;
+		opacity: 0.5;
+	}
+
+	.placeholder-text {
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+	}
+
+	.placeholder-subtext {
+		font-size: 0.7rem;
+		opacity: 0.7;
+	}
+
+	/* Bottom Section: Betting Odds */
+	.bottom-section {
+		height: 280px;
+		min-height: 200px;
+	}
+
+	.bottom-section :global(.panel) {
 		height: 100%;
 	}
 
-	.betting-container :global(.panel-content) {
+	.bottom-section :global(.panel-content) {
 		height: calc(100% - 2.5rem);
 		overflow-y: auto;
 	}
@@ -136,14 +182,19 @@
 		}
 
 		.map-container {
-			height: 400px;
+			height: 350px;
 			flex: none;
 		}
 
-		.betting-container {
+		.feed-placeholder {
 			max-width: none;
 			min-width: auto;
-			flex: 1;
+			height: 200px;
+			flex: none;
+		}
+
+		.bottom-section {
+			height: 250px;
 		}
 	}
 
@@ -153,7 +204,15 @@
 		}
 
 		.map-container {
-			height: 300px;
+			height: 280px;
+		}
+
+		.feed-placeholder {
+			height: 150px;
+		}
+
+		.bottom-section {
+			height: 220px;
 		}
 	}
 </style>

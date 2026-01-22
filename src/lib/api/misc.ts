@@ -217,3 +217,81 @@ export async function fetchGovContracts(): Promise<Contract[]> {
 export async function fetchLayoffs(): Promise<Layoff[]> {
 	return [];
 }
+
+/**
+ * Live feed item for news and social posts
+ */
+export interface LiveFeedItem {
+	id: string;
+	title: string;
+	source: string;
+	url: string;
+	timestamp: Date;
+	type: 'news' | 'tweet';
+	author?: string;
+	authorHandle?: string;
+	authorFollowers?: number;
+}
+
+/**
+ * Fetch Greenland news from GDELT for the live feed
+ * Returns news articles mentioning Greenland from major outlets
+ */
+export async function fetchGreenlandLiveFeed(): Promise<LiveFeedItem[]> {
+	try {
+		const query = '(Greenland OR Nuuk OR "Kalaallit Nunaat" OR Pituffik OR Thule OR "Trump Greenland" OR "Danish realm") sourcelang:english';
+		const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&timespan=7d&mode=artlist&maxrecords=30&format=json&sort=date`;
+
+		console.log('Fetching Greenland live feed from GDELT...');
+
+		const response = await fetch(gdeltUrl);
+		if (!response.ok) {
+			console.warn('GDELT API failed:', response.status);
+			return [];
+		}
+
+		const text = await response.text();
+		let data: { articles?: Array<{ title: string; url: string; seendate: string; domain: string }> };
+		try {
+			data = JSON.parse(text);
+		} catch {
+			console.warn('Invalid JSON from GDELT');
+			return [];
+		}
+
+		if (!data?.articles) return [];
+
+		return data.articles.map((article, index) => {
+			// Parse GDELT date format (20251202T224500Z)
+			let timestamp = new Date();
+			if (article.seendate) {
+				const match = article.seendate.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+				if (match) {
+					const [, year, month, day, hour, min, sec] = match;
+					timestamp = new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}Z`);
+				}
+			}
+
+			// Extract source name from domain
+			let source = article.domain || 'Unknown';
+			// Clean up common domains
+			source = source.replace(/^www\./, '').replace(/\.com$|\.org$|\.net$|\.co\.uk$/, '');
+			// Capitalize first letter of each word
+			source = source.split(/[.-]/).map(word =>
+				word.charAt(0).toUpperCase() + word.slice(1)
+			).join(' ');
+
+			return {
+				id: `news-${index}-${Date.now()}`,
+				title: article.title,
+				source,
+				url: article.url,
+				timestamp,
+				type: 'news' as const
+			};
+		});
+	} catch (error) {
+		console.error('Failed to fetch Greenland live feed:', error);
+		return [];
+	}
+}

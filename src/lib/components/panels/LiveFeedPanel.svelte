@@ -1,47 +1,50 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import type { NewsItem } from '$lib/types';
-	import { allNewsItems } from '$lib/stores';
-	import { fetchAllNews } from '$lib/api';
-	import { news } from '$lib/stores';
+	import { fetchGreenlandLiveFeed } from '$lib/api';
+	import type { LiveFeedItem } from '$lib/api';
 
-	// Feed items with metadata for display
-	interface FeedItem {
-		id: string;
-		title: string;
-		source: string;
-		url: string;
-		timestamp: Date;
-		type: 'news' | 'alert' | 'breaking';
-		category?: string;
-	}
-
-	let feedItems = $state<FeedItem[]>([]);
+	let feedItems = $state<LiveFeedItem[]>([]);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
 	let feedContainer: HTMLDivElement;
 	let autoScroll = $state(true);
 	let pollInterval: ReturnType<typeof setInterval> | null = null;
-	let lastSeenIds = new Set<string>();
 
-	// Convert news items to feed items
-	function newsToFeedItems(items: NewsItem[]): FeedItem[] {
-		return items.map((item) => ({
-			id: item.id,
-			title: item.title,
-			source: item.source || 'Unknown',
-			url: item.link,
-			timestamp: new Date(item.pubDate || Date.now()),
-			type: isBreaking(item.title) ? 'breaking' : isAlert(item.title) ? 'alert' : 'news',
-			category: item.category
-		}));
+	// Format timestamp like Twitch chat
+	function formatTime(date: Date): string {
+		return date.toLocaleTimeString('en-US', {
+			hour: '2-digit',
+			minute: '2-digit',
+			hour12: false
+		});
 	}
 
-	// Check if title suggests breaking news
-	function isBreaking(title: string): boolean {
-		const lower = title.toLowerCase();
-		return lower.includes('breaking') || lower.includes('just in') || lower.includes('developing');
+	// Get source color for major outlets
+	function getSourceColor(source: string): string {
+		const colors: Record<string, string> = {
+			reuters: '#ff6600',
+			'associated press': '#ff0000',
+			ap: '#ff0000',
+			bbc: '#bb1919',
+			cnn: '#cc0000',
+			guardian: '#052962',
+			politico: '#ff3333',
+			'arctic today': '#00ccff',
+			'high north news': '#0099cc',
+			nytimes: '#000000',
+			'new york times': '#000000',
+			washingtonpost: '#2a2a2a',
+			'washington post': '#2a2a2a',
+			default: '#888888'
+		};
+		const key = source.toLowerCase();
+		for (const [name, color] of Object.entries(colors)) {
+			if (key.includes(name)) return color;
+		}
+		return colors.default;
 	}
 
-	// Check if title contains alert keywords
+	// Check if title suggests breaking/alert news
 	function isAlert(title: string): boolean {
 		const lower = title.toLowerCase();
 		const alertWords = [
@@ -55,106 +58,43 @@
 			'sovereignty',
 			'rare earth',
 			'china',
-			'russia'
+			'russia',
+			'breaking',
+			'just in'
 		];
 		return alertWords.some((word) => lower.includes(word));
 	}
 
-	// Format timestamp like Twitch chat
-	function formatTime(date: Date): string {
-		return date.toLocaleTimeString('en-US', {
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: false
-		});
+	function isBreaking(title: string): boolean {
+		const lower = title.toLowerCase();
+		return lower.includes('breaking') || lower.includes('just in') || lower.includes('developing');
 	}
 
-	// Get source color
-	function getSourceColor(source: string): string {
-		const colors: Record<string, string> = {
-			reuters: '#ff6600',
-			'associated press': '#ff0000',
-			bbc: '#bb1919',
-			cnn: '#cc0000',
-			'the guardian': '#052962',
-			politico: '#ff3333',
-			'arctic today': '#00ccff',
-			'high north news': '#0099cc',
-			default: '#888888'
-		};
-		const key = source.toLowerCase();
-		for (const [name, color] of Object.entries(colors)) {
-			if (key.includes(name)) return color;
-		}
-		return colors.default;
-	}
-
-	// Get type badge
-	function getTypeBadge(type: 'news' | 'alert' | 'breaking'): { text: string; class: string } {
-		switch (type) {
-			case 'breaking':
-				return { text: 'BREAKING', class: 'badge-breaking' };
-			case 'alert':
-				return { text: 'ALERT', class: 'badge-alert' };
-			default:
-				return { text: '', class: '' };
-		}
-	}
-
-	// Poll for new items
-	async function pollForUpdates() {
+	async function loadFeed() {
 		try {
-			const data = await fetchAllNews();
-			Object.entries(data).forEach(([category, items]) => {
-				news.setItems(category as keyof typeof data, items);
-			});
-		} catch (error) {
-			console.error('Feed poll error:', error);
+			loading = feedItems.length === 0;
+			const items = await fetchGreenlandLiveFeed();
+			feedItems = items;
+			error = null;
+		} catch (e) {
+			console.error('Failed to fetch live feed:', e);
+			error = 'Failed to load live feed';
+		} finally {
+			loading = false;
 		}
 	}
-
-	// Update feed when store changes
-	$effect(() => {
-		const items = $allNewsItems;
-		const newFeedItems = newsToFeedItems(items);
-
-		// Find truly new items
-		const newItems = newFeedItems.filter((item) => !lastSeenIds.has(item.id));
-
-		if (newItems.length > 0) {
-			newItems.forEach((item) => lastSeenIds.add(item.id));
-			// Sort by timestamp, newest first for display (but we'll reverse for chat style)
-			feedItems = [...newFeedItems]
-				.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-				.slice(0, 100); // Keep last 100 items
-		} else if (feedItems.length === 0) {
-			// Initial load
-			feedItems = newFeedItems
-				.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-				.slice(0, 100);
-			feedItems.forEach((item) => lastSeenIds.add(item.id));
-		}
-	});
-
-	// Auto-scroll when new items arrive
-	$effect(() => {
-		if (autoScroll && feedContainer && feedItems.length > 0) {
-			// Scroll to top since newest items are at top
-			feedContainer.scrollTop = 0;
-		}
-	});
 
 	// Handle scroll to toggle auto-scroll
 	function handleScroll() {
 		if (feedContainer) {
-			// If user scrolled down, disable auto-scroll
 			autoScroll = feedContainer.scrollTop < 50;
 		}
 	}
 
 	onMount(() => {
-		// Poll every 30 seconds for updates
-		pollInterval = setInterval(pollForUpdates, 30000);
+		loadFeed();
+		// Poll every 60 seconds for updates
+		pollInterval = setInterval(loadFeed, 60000);
 	});
 
 	onDestroy(() => {
@@ -174,36 +114,61 @@
 	</div>
 
 	<div class="feed-container" bind:this={feedContainer} onscroll={handleScroll}>
-		{#if feedItems.length === 0}
+		{#if loading && feedItems.length === 0}
 			<div class="feed-loading">
 				<div class="loading-spinner"></div>
-				<span>Waiting for updates...</span>
+				<span>Loading news...</span>
+			</div>
+		{:else if error && feedItems.length === 0}
+			<div class="feed-error">
+				<span>Failed to load feed</span>
+				<button onclick={() => loadFeed()}>Retry</button>
+			</div>
+		{:else if feedItems.length === 0}
+			<div class="feed-empty">
+				<span class="empty-icon">📰</span>
+				<span>No Greenland news found</span>
 			</div>
 		{:else}
-			{#each feedItems as item (item.id)}
-				<a
-					href={item.url}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="feed-item"
-					class:breaking={item.type === 'breaking'}
-					class:alert={item.type === 'alert'}
-				>
-					<div class="item-meta">
-						<span class="timestamp">{formatTime(item.timestamp)}</span>
-						{#if item.type !== 'news'}
-							{@const badge = getTypeBadge(item.type)}
-							<span class="badge {badge.class}">{badge.text}</span>
-						{/if}
-						<span class="source" style="color: {getSourceColor(item.source)}">{item.source}</span>
-					</div>
-					<div class="item-title">{item.title}</div>
-				</a>
-			{/each}
+			<!-- News Section -->
+			<div class="feed-section">
+				<div class="section-label">NEWS</div>
+				{#each feedItems as item (item.id)}
+					<a
+						href={item.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="feed-item"
+						class:breaking={isBreaking(item.title)}
+						class:alert={isAlert(item.title) && !isBreaking(item.title)}
+					>
+						<div class="item-meta">
+							<span class="timestamp">{formatTime(item.timestamp)}</span>
+							{#if isBreaking(item.title)}
+								<span class="badge badge-breaking">BREAKING</span>
+							{:else if isAlert(item.title)}
+								<span class="badge badge-alert">ALERT</span>
+							{/if}
+							<span class="source" style="color: {getSourceColor(item.source)}">{item.source}</span>
+						</div>
+						<div class="item-title">{item.title}</div>
+					</a>
+				{/each}
+			</div>
+
+			<!-- X/Twitter Placeholder Section -->
+			<div class="feed-section x-section">
+				<div class="section-label">X POSTS</div>
+				<div class="x-placeholder">
+					<span class="x-icon">𝕏</span>
+					<span class="x-text">X/Twitter integration requires API access</span>
+					<span class="x-subtext">Politicians & influencers (200K+ followers)</span>
+				</div>
+			</div>
 		{/if}
 	</div>
 
-	{#if !autoScroll}
+	{#if !autoScroll && feedItems.length > 0}
 		<button
 			class="scroll-to-top"
 			onclick={() => {
@@ -211,7 +176,7 @@
 				feedContainer.scrollTop = 0;
 			}}
 		>
-			↑ New updates
+			↑ Back to top
 		</button>
 	{/if}
 </div>
@@ -225,6 +190,7 @@
 		border: 1px solid var(--border, #30363d);
 		border-radius: 6px;
 		overflow: hidden;
+		position: relative;
 	}
 
 	.feed-header {
@@ -292,14 +258,17 @@
 		border-radius: 3px;
 	}
 
-	.feed-loading {
+	.feed-loading,
+	.feed-error,
+	.feed-empty {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 1rem;
+		gap: 0.75rem;
 		padding: 2rem;
 		color: var(--text-muted, #7d8590);
+		text-align: center;
 	}
 
 	.loading-spinner {
@@ -315,6 +284,36 @@
 		to {
 			transform: rotate(360deg);
 		}
+	}
+
+	.empty-icon {
+		font-size: 2rem;
+		opacity: 0.5;
+	}
+
+	.feed-error button {
+		padding: 0.5rem 1rem;
+		background: var(--accent, #58a6ff);
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.8rem;
+	}
+
+	.feed-section {
+		margin-bottom: 1rem;
+	}
+
+	.section-label {
+		font-size: 0.65rem;
+		font-weight: 700;
+		color: var(--text-muted, #7d8590);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		padding: 0.5rem 0.5rem 0.25rem;
+		border-bottom: 1px solid var(--border, #30363d);
+		margin-bottom: 0.5rem;
 	}
 
 	.feed-item {
@@ -395,8 +394,44 @@
 		line-height: 1.4;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	/* X/Twitter placeholder section */
+	.x-section {
+		margin-top: auto;
+	}
+
+	.x-placeholder {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 1.5rem;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px dashed var(--border, #30363d);
+		border-radius: 6px;
+		color: var(--text-muted, #7d8590);
+		text-align: center;
+	}
+
+	.x-icon {
+		font-size: 1.5rem;
+		margin-bottom: 0.5rem;
+		opacity: 0.5;
+	}
+
+	.x-text {
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	.x-subtext {
+		font-size: 0.65rem;
+		opacity: 0.7;
+		margin-top: 0.25rem;
 	}
 
 	.scroll-to-top {

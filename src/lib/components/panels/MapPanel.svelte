@@ -36,8 +36,8 @@
 	let zoom: any = null;
 	/* eslint-enable @typescript-eslint/no-explicit-any */
 
-	const WIDTH = 800;
-	const HEIGHT = 400;
+	const WIDTH = 600;
+	const HEIGHT = 600;
 
 	// Tooltip state
 	let tooltipContent = $state<{
@@ -297,12 +297,13 @@
 
 		enableZoom();
 
-		// Setup projection
+		// Setup projection - focused on Greenland/Arctic
 		projection = d3
-			.geoEquirectangular()
-			.scale(130)
-			.center([0, 20])
-			.translate([WIDTH / 2, HEIGHT / 2 - 30]);
+			.geoOrthographic()
+			.scale(350)
+			.center([0, 0])
+			.rotate([42, -72, 0]) // Rotate to center on Greenland (lon 42W, lat 72N)
+			.translate([WIDTH / 2, HEIGHT / 2]);
 
 		path = d3.geoPath().projection(projection);
 
@@ -627,7 +628,7 @@
 	});
 </script>
 
-<Panel id="map" title="Global Situation" {loading} {error}>
+<Panel id="map" title="Arctic Region" {loading} {error}>
 	<div class="map-container" bind:this={mapContainer}>
 		<svg class="map-svg"></svg>
 		{#if tooltipVisible && tooltipContent}
@@ -664,7 +665,7 @@
 	.map-container {
 		position: relative;
 		width: 100%;
-		aspect-ratio: 2 / 1;
+		height: 100%;
 		background: #0a0f0d;
 		border-radius: 4px;
 		overflow: hidden;

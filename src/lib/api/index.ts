@@ -16,9 +16,10 @@ export {
 	fetchAllPredictions,
 	fetchWhaleTransactions,
 	fetchGovContracts,
-	fetchLayoffs
+	fetchLayoffs,
+	fetchGreenlandLiveFeed
 } from './misc';
-export type { Prediction, WhaleTransaction, Contract, Layoff } from './misc';
+export type { Prediction, WhaleTransaction, Contract, Layoff, LiveFeedItem } from './misc';
 export { fetchWorldLeaders } from './leaders';
 export { fetchFedIndicators, fetchFedNews, isFredConfigured } from './fred';
 export type { FedIndicators, EconomicIndicator, FedNewsItem, FedNewsType } from './fred';

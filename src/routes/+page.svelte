@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Header } from '$lib/components/layout';
 	import { SettingsModal, OnboardingModal } from '$lib/components/modals';
-	import { MapPanel, BettingOddsPanel } from '$lib/components/panels';
+	import { MapPanel, BettingOddsPanel, LiveFeedPanel } from '$lib/components/panels';
 	import { monitors, settings, refresh } from '$lib/stores';
 	import type { PanelId } from '$lib/config';
 
@@ -58,13 +58,9 @@
 				{/if}
 			</div>
 
-			<!-- Right Side - Reserved for Live Feed -->
-			<div class="feed-placeholder">
-				<div class="placeholder-content">
-					<span class="placeholder-icon">📡</span>
-					<span class="placeholder-text">Live Feed</span>
-					<span class="placeholder-subtext">Coming Soon</span>
-				</div>
+			<!-- Right Side - Live Feed -->
+			<div class="feed-container">
+				<LiveFeedPanel />
 			</div>
 		</div>
 
@@ -123,41 +119,12 @@
 		height: calc(100% - 2.5rem);
 	}
 
-	.feed-placeholder {
+	.feed-container {
 		flex: 1;
 		min-width: 300px;
 		max-width: 400px;
-		background: var(--surface, #0d1117);
-		border: 1px dashed var(--border, #30363d);
 		border-radius: 6px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.placeholder-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		color: var(--text-muted, #7d8590);
-	}
-
-	.placeholder-icon {
-		font-size: 2rem;
-		opacity: 0.5;
-	}
-
-	.placeholder-text {
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-	}
-
-	.placeholder-subtext {
-		font-size: 0.7rem;
-		opacity: 0.7;
+		overflow: hidden;
 	}
 
 	/* Bottom Section: Betting Odds */
@@ -186,10 +153,10 @@
 			flex: none;
 		}
 
-		.feed-placeholder {
+		.feed-container {
 			max-width: none;
 			min-width: auto;
-			height: 200px;
+			height: 300px;
 			flex: none;
 		}
 
@@ -207,8 +174,8 @@
 			height: 280px;
 		}
 
-		.feed-placeholder {
-			height: 150px;
+		.feed-container {
+			height: 250px;
 		}
 
 		.bottom-section {

@@ -3,6 +3,8 @@
  * Uses real APIs where available, returns empty arrays where APIs require authentication
  */
 
+import { CORS_PROXY_URL } from '$lib/config/api';
+
 export interface Prediction {
 	id: string;
 	question: string;
@@ -40,7 +42,10 @@ export interface Layoff {
 export async function fetchPolymarket(): Promise<Prediction[]> {
 	try {
 		// Polymarket Gamma API - public endpoint for market data
-		const response = await fetch('https://gamma-api.polymarket.com/markets?closed=false&limit=100');
+		// Use CORS proxy to avoid proxy restrictions in development
+		const apiUrl = 'https://gamma-api.polymarket.com/markets?closed=false&limit=100';
+		const proxyUrl = CORS_PROXY_URL + encodeURIComponent(apiUrl);
+		const response = await fetch(proxyUrl);
 
 		if (!response.ok) {
 			console.warn('Polymarket API returned non-OK status:', response.status);
@@ -110,15 +115,16 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 export async function fetchKalshi(): Promise<Prediction[]> {
 	try {
 		// Kalshi public API for market data
-		const response = await fetch(
-			'https://api.elections.kalshi.com/trade-api/v2/markets?limit=100&status=open'
-		);
+		// Use CORS proxy to avoid proxy restrictions in development
+		const apiUrl = 'https://api.elections.kalshi.com/trade-api/v2/markets?limit=100&status=open';
+		const proxyUrl = CORS_PROXY_URL + encodeURIComponent(apiUrl);
+		const response = await fetch(proxyUrl);
 
 		if (!response.ok) {
 			// Try alternative endpoint
-			const altResponse = await fetch(
-				'https://trading-api.kalshi.com/trade-api/v2/markets?limit=100&status=open'
-			);
+			const altApiUrl = 'https://trading-api.kalshi.com/trade-api/v2/markets?limit=100&status=open';
+			const altProxyUrl = CORS_PROXY_URL + encodeURIComponent(altApiUrl);
+			const altResponse = await fetch(altProxyUrl);
 			if (!altResponse.ok) {
 				console.warn('Kalshi API returned non-OK status');
 				return [];

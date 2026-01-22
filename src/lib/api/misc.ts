@@ -1,9 +1,7 @@
 /**
  * Miscellaneous API functions for specialized panels
- * Uses real APIs where available, returns empty arrays where APIs require authentication
+ * Prediction market data from Polymarket and Kalshi
  */
-
-import { CORS_PROXIES } from '$lib/config/api';
 
 export interface Prediction {
 	id: string;
@@ -36,42 +34,27 @@ export interface Layoff {
 }
 
 /**
- * Fetch with CORS proxy
- */
-async function fetchWithCors(url: string): Promise<Response> {
-	// Try primary proxy first
-	try {
-		const response = await fetch(CORS_PROXIES.primary + encodeURIComponent(url));
-		if (response.ok) {
-			return response;
-		}
-	} catch {
-		// Fall through to fallback
-	}
-
-	// Fallback proxy
-	return fetch(CORS_PROXIES.fallback + encodeURIComponent(url));
-}
-
-/**
- * Fetch Polymarket predictions via their public Gamma API
- * Filters for Greenland and Arctic related markets
+ * Fetch Polymarket predictions via their CLOB API
+ * This endpoint has CORS enabled
  */
 export async function fetchPolymarket(): Promise<Prediction[]> {
 	try {
-		// Polymarket Gamma API - public endpoint for market data
-		const response = await fetchWithCors(
-			'https://gamma-api.polymarket.com/markets?closed=false&limit=100'
-		);
+		// Use the CLOB API which has better CORS support
+		const response = await fetch('https://clob.polymarket.com/markets?closed=false&limit=50', {
+			headers: {
+				Accept: 'application/json'
+			}
+		});
 
 		if (!response.ok) {
-			console.warn('Polymarket API returned non-OK status:', response.status);
+			console.warn('Polymarket CLOB API failed:', response.status);
 			return [];
 		}
 
-		const markets = await response.json();
+		const data = await response.json();
+		const markets = data.data || data || [];
 
-		// Filter for relevant topics (Greenland, Arctic, Trump, Denmark, NATO)
+		// Filter for relevant topics
 		const relevantKeywords = [
 			'greenland',
 			'arctic',
@@ -82,43 +65,42 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 			'china',
 			'military',
 			'territory',
-			'acquisition',
 			'president',
 			'war',
-			'ukraine'
+			'ukraine',
+			'biden',
+			'election'
 		];
 
 		const filtered = markets
-			.filter((market: { question: string }) => {
-				const q = (market.question || '').toLowerCase();
-				return relevantKeywords.some((kw) => q.includes(kw));
+			.filter((market: { question?: string; description?: string }) => {
+				const text = ((market.question || '') + ' ' + (market.description || '')).toLowerCase();
+				return relevantKeywords.some((kw) => text.includes(kw));
 			})
-			.slice(0, 15);
+			.slice(0, 20);
 
 		return filtered.map(
 			(market: {
-				id: string;
-				question: string;
-				outcomePrices: string;
-				volume: number;
-				slug: string;
+				condition_id?: string;
+				question?: string;
+				tokens?: Array<{ price?: number }>;
+				volume?: number;
+				market_slug?: string;
 			}) => {
-				// outcomePrices is a JSON string like "[0.65, 0.35]" for [Yes, No]
 				let yesPrice = 50;
-				try {
-					const prices = JSON.parse(market.outcomePrices || '[0.5, 0.5]');
-					yesPrice = Math.round(prices[0] * 100);
-				} catch {
-					yesPrice = 50;
+				if (market.tokens && market.tokens[0]?.price) {
+					yesPrice = Math.round(market.tokens[0].price * 100);
 				}
 
 				return {
-					id: `pm-${market.id}`,
-					question: market.question,
+					id: `pm-${market.condition_id || Math.random().toString(36)}`,
+					question: market.question || 'Unknown market',
 					yes: yesPrice,
 					volume: formatVolume(market.volume || 0),
 					source: 'polymarket' as const,
-					url: `https://polymarket.com/event/${market.slug}`
+					url: market.market_slug
+						? `https://polymarket.com/event/${market.market_slug}`
+						: 'https://polymarket.com'
 				};
 			}
 		);
@@ -129,35 +111,48 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 }
 
 /**
- * Fetch Kalshi predictions via their public API
- * Filters for relevant geopolitical markets
+ * Fetch Kalshi predictions
+ * Try multiple endpoints
  */
 export async function fetchKalshi(): Promise<Prediction[]> {
-	try {
-		// Kalshi public API for market data
-		const response = await fetchWithCors(
-			'https://api.elections.kalshi.com/trade-api/v2/markets?limit=100&status=open'
-		);
+	const endpoints = [
+		'https://api.elections.kalshi.com/trade-api/v2/markets?limit=50&status=open',
+		'https://trading-api.kalshi.com/trade-api/v2/markets?limit=50&status=open'
+	];
 
-		if (!response.ok) {
-			console.warn('Kalshi API returned non-OK status:', response.status);
-			return [];
+	for (const endpoint of endpoints) {
+		try {
+			const response = await fetch(endpoint, {
+				headers: {
+					Accept: 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				continue;
+			}
+
+			const data = await response.json();
+			const markets = data.markets || [];
+
+			return processKalshiMarkets(markets);
+		} catch (error) {
+			console.warn('Kalshi endpoint failed:', endpoint, error);
+			continue;
 		}
-
-		const data = await response.json();
-		return processKalshiMarkets(data.markets || []);
-	} catch (error) {
-		console.error('Failed to fetch Kalshi data:', error);
-		return [];
 	}
+
+	console.error('All Kalshi endpoints failed');
+	return [];
 }
 
 function processKalshiMarkets(
 	markets: Array<{
-		ticker: string;
-		title: string;
-		yes_ask: number;
-		volume: number;
+		ticker?: string;
+		title?: string;
+		yes_ask?: number;
+		yes_bid?: number;
+		volume?: number;
 	}>
 ): Prediction[] {
 	const relevantKeywords = [
@@ -171,7 +166,9 @@ function processKalshiMarkets(
 		'territory',
 		'president',
 		'war',
-		'ukraine'
+		'ukraine',
+		'biden',
+		'election'
 	];
 
 	const filtered = markets
@@ -179,15 +176,15 @@ function processKalshiMarkets(
 			const title = (market.title || '').toLowerCase();
 			return relevantKeywords.some((kw) => title.includes(kw));
 		})
-		.slice(0, 15);
+		.slice(0, 20);
 
 	return filtered.map((market) => ({
-		id: `kalshi-${market.ticker}`,
-		question: market.title,
-		yes: Math.round((market.yes_ask || 0.5) * 100),
+		id: `kalshi-${market.ticker || Math.random().toString(36)}`,
+		question: market.title || 'Unknown market',
+		yes: Math.round((market.yes_ask || market.yes_bid || 0.5) * 100),
 		volume: formatVolume(market.volume || 0),
 		source: 'kalshi' as const,
-		url: `https://kalshi.com/markets/${market.ticker}`
+		url: market.ticker ? `https://kalshi.com/markets/${market.ticker}` : 'https://kalshi.com'
 	}));
 }
 
@@ -195,14 +192,23 @@ function processKalshiMarkets(
  * Fetch all prediction market data from both sources
  */
 export async function fetchAllPredictions(): Promise<Prediction[]> {
-	const [polymarket, kalshi] = await Promise.all([fetchPolymarket(), fetchKalshi()]);
+	console.log('Fetching predictions from Polymarket and Kalshi...');
+
+	const results = await Promise.allSettled([fetchPolymarket(), fetchKalshi()]);
+
+	const polymarket = results[0].status === 'fulfilled' ? results[0].value : [];
+	const kalshi = results[1].status === 'fulfilled' ? results[1].value : [];
+
+	console.log(`Got ${polymarket.length} from Polymarket, ${kalshi.length} from Kalshi`);
 
 	// Combine and sort by volume
-	return [...polymarket, ...kalshi].sort((a, b) => {
+	const combined = [...polymarket, ...kalshi].sort((a, b) => {
 		const volA = parseVolume(a.volume);
 		const volB = parseVolume(b.volume);
 		return volB - volA;
 	});
+
+	return combined;
 }
 
 function formatVolume(volume: number): string {
@@ -224,30 +230,22 @@ function parseVolume(vol: string): number {
 }
 
 /**
- * Fetch whale transactions
- * Requires Whale Alert API key - returns empty without it
+ * Fetch whale transactions - disabled
  */
 export async function fetchWhaleTransactions(): Promise<WhaleTransaction[]> {
-	// Whale Alert API requires authentication
-	// Return empty array - users should configure VITE_WHALE_ALERT_API_KEY
 	return [];
 }
 
 /**
- * Fetch government contracts
- * USASpending.gov API - would need specific implementation
+ * Fetch government contracts - disabled
  */
 export async function fetchGovContracts(): Promise<Contract[]> {
-	// USASpending.gov has a public API but requires specific query building
-	// Return empty for now
 	return [];
 }
 
 /**
- * Fetch layoffs data
- * Would need to scrape layoffs.fyi or similar - no public API
+ * Fetch layoffs data - disabled
  */
 export async function fetchLayoffs(): Promise<Layoff[]> {
-	// No reliable public API for layoff data
 	return [];
 }

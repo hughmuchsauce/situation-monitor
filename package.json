@@ -14,7 +14,10 @@
 		"test:unit": "vitest run",
 		"test:e2e": "playwright test",
 		"lint": "eslint . && prettier --check .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"bot": "tsx bot/index.ts",
+		"bot:positions": "tsx bot/index.ts positions",
+		"bot:test": "tsx bot/test-connection.ts"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.49.0",
@@ -28,6 +31,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"@typescript-eslint/parser": "^8.0.0",
 		"autoprefixer": "^10.4.0",
+		"dotenv": "^17.2.3",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-svelte": "^2.0.0",
@@ -39,6 +43,7 @@
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
 		"tailwindcss": "^3.4.0",
+		"tsx": "^4.21.0",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.52.0",
 		"vite": "^6.0.0",
@@ -46,6 +51,7 @@
 	},
 	"dependencies": {
 		"d3": "^7.9.0",
+		"kalshi-typescript": "^3.5.0",
 		"topojson-client": "^3.1.0"
 	}
 }

@@ -33,7 +33,7 @@ print_info() {
 echo "📁 Step 1: Checking project directory..."
 if [ ! -f "package.json" ]; then
     print_error "Not in project directory!"
-    echo "Run: cd ~/Downloads/situation-monitor"
+    echo "Run: cd ~/situation-monitor"
     exit 1
 fi
 print_success "In correct directory"

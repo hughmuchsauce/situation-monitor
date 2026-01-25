@@ -7,6 +7,8 @@
 import { KalshiClient } from './kalshi-client';
 import { MarketAnalyzer, type TradeSignal } from './market-analyzer';
 import { loadConfig } from './config';
+import { WhaleActivityTracker } from './whale-tracker';
+import { BotAPIServer } from './api-server';
 
 class KalshiFollowerBot {
 	private client: KalshiClient;
@@ -14,6 +16,8 @@ class KalshiFollowerBot {
 	private config = loadConfig();
 	private dailyTrades = 0;
 	private isRunning = false;
+	private whaleTracker: WhaleActivityTracker;
+	private apiServer: BotAPIServer;
 
 	constructor() {
 		// Validate credentials
@@ -29,6 +33,8 @@ class KalshiFollowerBot {
 		});
 
 		this.analyzer = new MarketAnalyzer(this.config);
+		this.whaleTracker = new WhaleActivityTracker();
+		this.apiServer = new BotAPIServer(this.whaleTracker, 3001);
 
 		console.log('🤖 Kalshi Follower Bot initialized');
 		console.log(`📊 Mode: ${this.config.demoMode ? 'DEMO (no real trades)' : 'LIVE'}`);
@@ -41,7 +47,12 @@ class KalshiFollowerBot {
 	 */
 	async start() {
 		this.isRunning = true;
-		console.log('\n🚀 Starting bot...\n');
+
+		// Start API server for dashboard
+		this.apiServer.start();
+
+		console.log('\n🚀 Starting bot...');
+		console.log('📊 Dashboard available at: http://localhost:5173/bot\n');
 
 		// Reset daily trade counter at midnight
 		this.scheduleDailyReset();
@@ -59,6 +70,7 @@ class KalshiFollowerBot {
 	stop() {
 		console.log('\n⏸️  Stopping bot...');
 		this.isRunning = false;
+		this.apiServer.stop();
 	}
 
 	/**
@@ -122,6 +134,25 @@ class KalshiFollowerBot {
 		console.log(`      Confidence: ${signal.confidence}%`);
 		console.log(`      Suggested: ${signal.suggestedSize} contracts @ ${signal.suggestedPrice}¢`);
 		console.log(`      Reason: ${signal.reason}`);
+
+		// Track whale activity
+		const signalType = signal.reason.toLowerCase().includes('volume spike')
+			? ('volume_spike' as const)
+			: signal.reason.toLowerCase().includes('large trade')
+				? ('large_trade' as const)
+				: ('directional_flow' as const);
+
+		this.whaleTracker.addSignal({
+			ticker: signal.ticker,
+			marketTitle: signal.marketTitle,
+			signalType,
+			side: signal.side,
+			confidence: signal.confidence,
+			price: signal.suggestedPrice,
+			size: signal.suggestedSize,
+			reason: signal.reason,
+			volume24h: 0
+		});
 
 		// Check if we can trade
 		if (this.dailyTrades >= this.config.maxDailyTrades) {

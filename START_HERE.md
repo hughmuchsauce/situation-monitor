@@ -37,9 +37,29 @@ That's it! The bot will:
 
 ## Commands
 
+- **Run bot + dashboard**: `npm run bot:dev` (Recommended!)
+- **Dashboard URL**: http://localhost:5173/bot
 - **Stop the bot**: Press `Ctrl+C`
 - **Check positions**: `npm run bot:positions`
 - **Test connection**: `npm run bot:test`
+
+## 🐋 Whale Tracker Dashboard
+
+View whale activity in a beautiful web interface!
+
+```bash
+npm run bot:dev
+```
+
+Then open: **http://localhost:5173/bot**
+
+Features:
+- 📊 Real-time signal tracking
+- 📈 24-hour activity charts
+- 🏆 Top markets by whale activity
+- 🔴 Live status indicator
+
+See `DASHBOARD.md` for full details.
 
 ## Enable Real Trading
 

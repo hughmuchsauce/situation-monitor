@@ -44,10 +44,19 @@ npm install --silent
 echo ""
 echo "✅ Installation complete!"
 echo ""
-echo "🚀 Starting the bot in DEMO mode..."
+echo "🚀 Starting bot + dashboard..."
+echo "   Bot: Running in DEMO mode (no real trades)"
+echo "   Dashboard: http://localhost:5173/bot"
+echo ""
 echo "   (Press Ctrl+C to stop)"
 echo ""
 sleep 2
 
-# Run the bot
-npm run bot
+# Open dashboard in browser
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "🌐 Opening dashboard in browser..."
+    sleep 3 && open http://localhost:5173/bot &
+fi
+
+# Run bot + dev server
+npm run bot:dev

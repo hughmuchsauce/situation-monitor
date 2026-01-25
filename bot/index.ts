@@ -85,12 +85,22 @@ class KalshiFollowerBot {
 			console.log(`   Found ${markets.length} total markets`);
 
 			// Filter for weather/climate
-			const targetMarkets = markets.filter((m) => this.analyzer.isWeatherOrClimateMarket(m));
+			let targetMarkets = markets.filter((m) => this.analyzer.isWeatherOrClimateMarket(m));
 			console.log(`   → ${targetMarkets.length} weather/climate markets`);
 
+			// Fallback: If no weather/climate markets, use top volume markets
 			if (targetMarkets.length === 0) {
-				console.log('   ⚠️  No target markets found');
-				return;
+				console.log('   ⚠️  No weather/climate markets - using top volume markets');
+				targetMarkets = markets
+					.filter((m) => (m.volume || 0) > this.config.minVolume)
+					.sort((a, b) => (b.volume || 0) - (a.volume || 0))
+					.slice(0, 20);
+				console.log(`   → Analyzing ${targetMarkets.length} high-volume markets`);
+
+				if (targetMarkets.length === 0) {
+					console.log('   ⚠️  No markets with sufficient volume');
+					return;
+				}
 			}
 
 			// Analyze each market

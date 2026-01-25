@@ -211,8 +211,10 @@ export class MarketAnalyzer {
 	isWeatherOrClimateMarket(market: Market): boolean {
 		const title = (market.title || '').toLowerCase();
 		const seriesTicker = (market.series_ticker || '').toLowerCase();
+		const category = (market.category || '').toLowerCase();
+		const subtitle = (market.subtitle || '').toLowerCase();
 
-		// Weather keywords
+		// Weather keywords (expanded)
 		const weatherKeywords = [
 			'weather',
 			'temperature',
@@ -229,7 +231,15 @@ export class MarketAnalyzer {
 			'wind',
 			'heat',
 			'cold',
-			'freeze'
+			'freeze',
+			'frost',
+			'blizzard',
+			'hail',
+			'thunder',
+			'lightning',
+			'degrees',
+			'°f',
+			'°c'
 		];
 
 		// Climate keywords
@@ -242,13 +252,27 @@ export class MarketAnalyzer {
 			'glacier',
 			'ice cap',
 			'el nino',
-			'la nina'
+			'la nina',
+			'arctic',
+			'antarctic'
 		];
+
+		// Common Kalshi weather series
+		const weatherSeries = ['kxhigh', 'kxlow', 'kxsnow', 'kxrain', 'highnyc', 'temp'];
 
 		const allKeywords = [...weatherKeywords, ...climateKeywords];
 
-		return allKeywords.some(
-			(keyword) => title.includes(keyword) || seriesTicker.includes(keyword)
+		// Check all fields
+		const matchesKeyword = allKeywords.some(
+			(keyword) =>
+				title.includes(keyword) ||
+				seriesTicker.includes(keyword) ||
+				category.includes(keyword) ||
+				subtitle.includes(keyword)
 		);
+
+		const matchesSeries = weatherSeries.some((series) => seriesTicker.includes(series));
+
+		return matchesKeyword || matchesSeries;
 	}
 }

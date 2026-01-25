@@ -1,7 +1,7 @@
 {
-	"name": "greenland-monitor",
+	"name": "kalshi-whale-tracker",
 	"version": "1.0.0",
-	"description": "Real-time intelligence dashboard for Greenland, the Arctic, and Danish relations",
+	"description": "Real-time bot that follows profitable Kalshi weather/climate bettors",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -28,7 +28,6 @@
 		"@testing-library/svelte": "^5.0.0",
 		"@types/d3": "^7.4.0",
 		"@types/node": "^22.0.0",
-		"@types/topojson-client": "^3.1.0",
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"@typescript-eslint/parser": "^8.0.0",
 		"autoprefixer": "^10.4.0",
@@ -53,7 +52,6 @@
 	},
 	"dependencies": {
 		"d3": "^7.9.0",
-		"kalshi-typescript": "^3.5.0",
-		"topojson-client": "^3.1.0"
+		"kalshi-typescript": "^3.5.0"
 	}
 }

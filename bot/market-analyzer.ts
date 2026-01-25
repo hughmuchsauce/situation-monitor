@@ -178,30 +178,50 @@ export class MarketAnalyzer {
 	}
 
 	/**
-	 * Detect large individual trades that might be from informed traders
+	 * Calculate dollar value of a trade (contracts * price / 100)
+	 * Price is in cents (0-100), so divide by 100 to get dollars
+	 */
+	private getTradeValue(trade: Trade): number {
+		const count = trade.count || 0;
+		const price = trade.taker_side === 'yes' ? (trade.yes_price || 50) : (trade.no_price || 50);
+		return (count * price) / 100;
+	}
+
+	/**
+	 * Detect large individual trades that might be from informed traders (whales)
+	 * Whale threshold: $2M in actual dollars spent
 	 */
 	private detectLargeTrades(market: Market, trades: Trade[]): TradeSignal | null {
-		const largeTrades = trades.filter((t) => (t.count || 0) >= this.config.minTradeSize);
+		// Filter for whale-sized trades ($2M threshold)
+		const whaleTrades = trades.filter((t) => {
+			const tradeValue = this.getTradeValue(t);
+			return tradeValue >= this.config.minTradeSize; // $2M in config
+		});
 
-		if (largeTrades.length === 0) return null;
+		if (whaleTrades.length === 0) return null;
 
-		// Get the most recent large trade
-		const latestLarge = largeTrades.sort(
+		// Get the most recent whale trade
+		const latestWhale = whaleTrades.sort(
 			(a, b) => new Date(b.created_time!).getTime() - new Date(a.created_time!).getTime()
 		)[0];
+
+		const whaleValue = this.getTradeValue(latestWhale);
+		const whaleValueStr = whaleValue >= 1000000
+			? `$${(whaleValue / 1000000).toFixed(2)}M`
+			: `$${(whaleValue / 1000).toFixed(0)}K`;
 
 		return {
 			ticker: market.ticker!,
 			marketTitle: market.title || '',
-			side: latestLarge.taker_side as 'yes' | 'no',
-			confidence: 65, // Medium confidence for individual trade
+			side: latestWhale.taker_side as 'yes' | 'no',
+			confidence: 85, // High confidence for whale trades
 			suggestedPrice:
-				latestLarge.taker_side === 'yes' ? latestLarge.yes_price : latestLarge.no_price,
+				latestWhale.taker_side === 'yes' ? latestWhale.yes_price : latestWhale.no_price,
 			suggestedSize: Math.min(
-				Math.round((latestLarge.count || 0) * this.config.followRatio),
+				Math.round((latestWhale.count || 0) * this.config.followRatio),
 				this.config.maxPositionSize
 			),
-			reason: `Large trade detected: ${latestLarge.count} contracts @ ${latestLarge.yes_price}¢`
+			reason: `🐋 WHALE DETECTED: ${whaleValueStr} (${latestWhale.count} contracts @ ${latestWhale.yes_price || latestWhale.no_price}¢)`
 		};
 	}
 

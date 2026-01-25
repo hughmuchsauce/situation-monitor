@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Kalshi Follower Bot
- * Monitors weather/climate markets and follows profitable trading patterns
+ * Kalshi Whale Tracker Bot
+ * Monitors ALL high-volume markets and detects whale trades ($2M+)
  */
 
 import { KalshiClient } from './kalshi-client';
@@ -39,7 +39,8 @@ class KalshiFollowerBot {
 		console.log('🤖 Kalshi Follower Bot initialized');
 		console.log(`📊 Mode: ${this.config.demoMode ? 'DEMO (no real trades)' : 'LIVE'}`);
 		console.log(`⏱️  Poll interval: ${this.config.pollIntervalMs / 1000}s`);
-		console.log(`📈 Target categories: ${this.config.categories.join(', ')}`);
+		console.log(`🐋 Whale threshold: $${(this.config.minTradeSize / 1000000).toFixed(1)}M`);
+		console.log(`📈 Tracking: ALL high-volume markets`);
 	}
 
 	/**
@@ -78,29 +79,23 @@ class KalshiFollowerBot {
 	 */
 	private async runAnalysisLoop() {
 		try {
-			console.log(`[${new Date().toISOString()}] 🔍 Scanning markets...`);
+			console.log(`[${new Date().toISOString()}] 🔍 Scanning markets for whale activity...`);
 
 			// Get all open markets
 			const markets = await this.client.getMarkets();
-			console.log(`   Found ${markets.length} total markets`);
+			console.log(`   📊 Found ${markets.length} total markets`);
 
-			// Filter for weather/climate
-			let targetMarkets = markets.filter((m) => this.analyzer.isWeatherOrClimateMarket(m));
-			console.log(`   → ${targetMarkets.length} weather/climate markets`);
+			// Track top 50 volume markets to catch whale activity
+			const targetMarkets = markets
+				.filter((m) => (m.volume || 0) > this.config.minVolume)
+				.sort((a, b) => (b.volume || 0) - (a.volume || 0))
+				.slice(0, 50);
 
-			// Fallback: If no weather/climate markets, use top volume markets
+			console.log(`   🎯 Analyzing top ${targetMarkets.length} high-volume markets`);
+
 			if (targetMarkets.length === 0) {
-				console.log('   ⚠️  No weather/climate markets - using top volume markets');
-				targetMarkets = markets
-					.filter((m) => (m.volume || 0) > this.config.minVolume)
-					.sort((a, b) => (b.volume || 0) - (a.volume || 0))
-					.slice(0, 20);
-				console.log(`   → Analyzing ${targetMarkets.length} high-volume markets`);
-
-				if (targetMarkets.length === 0) {
-					console.log('   ⚠️  No markets with sufficient volume');
-					return;
-				}
+				console.log('   ⚠️  No markets with sufficient volume (>${this.config.minVolume})');
+				return;
 			}
 
 			// Analyze each market

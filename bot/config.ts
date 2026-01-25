@@ -18,7 +18,7 @@ export interface BotConfig {
 	minVolume: number; // Minimum 24h volume to consider a market
 
 	// Trade following logic
-	minTradeSize: number; // Minimum contract count to consider a trade "significant"
+	minTradeSize: number; // Whale threshold in USD (e.g., 2000000 = $2M)
 	volumeSpikeTreshold: number; // % increase in volume to trigger a follow (e.g., 50 means 50% spike)
 	followRatio: number; // What % of detected trade to copy (e.g., 0.5 = copy 50% of size)
 	maxPositionSize: number; // Maximum contracts to hold in a single market
@@ -33,15 +33,15 @@ export const defaultConfig: BotConfig = {
 	privateKey: process.env.KALSHI_PRIVATE_KEY || '',
 
 	demoMode: true, // Start in demo mode for safety
-	pollIntervalMs: 30000, // Check every 30 seconds
+	pollIntervalMs: 60000, // Check every 60 seconds
 
-	categories: ['weather', 'climate'],
-	minVolume: 1000, // $1000 minimum volume
+	categories: [], // Track ALL markets (no filtering)
+	minVolume: 10000, // $10k minimum volume to reduce noise
 
-	minTradeSize: 10, // Trades of 10+ contracts are "significant"
-	volumeSpikeTreshold: 30, // 30% volume spike
-	followRatio: 0.3, // Copy 30% of detected trade size
-	maxPositionSize: 100, // Max 100 contracts per market
+	minTradeSize: 1000000, // $2M whale threshold (in dollar value, calculated dynamically)
+	volumeSpikeTreshold: 50, // 50% volume spike to detect whale activity
+	followRatio: 0.1, // Copy 10% of detected whale trade
+	maxPositionSize: 10000, // Max 10k contracts per market
 
 	maxDailyTrades: 20,
 	stopLossPercent: 20

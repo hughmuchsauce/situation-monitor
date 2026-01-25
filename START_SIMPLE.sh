@@ -5,10 +5,10 @@
 
 clear
 echo "================================================"
-echo " 🚀 KALSHI BOT - STARTING NOW"
+echo " 🐋 KALSHI WHALE TRACKER - STARTING NOW"
 echo "================================================"
 echo ""
-echo "This is the NEW version with fallback code."
+echo "Tracks ALL high-volume markets for whale trades ($2M+)"
 echo "If you see this message, you're running the latest code."
 echo ""
 
@@ -21,11 +21,11 @@ echo "✅ Done"
 echo ""
 
 # Check code
-echo "Checking for fallback code..."
-if grep -q "using top volume markets" bot/index.ts; then
-    echo "✅ Fallback code is present"
+echo "Checking for whale tracking code..."
+if grep -q "whale activity" bot/index.ts; then
+    echo "✅ Whale tracker code is present"
 else
-    echo "❌ ERROR: Fallback code missing!"
+    echo "❌ ERROR: Whale tracking code missing!"
     echo "Run: git pull origin claude/kalshi-follower-bot-MoXkd"
     exit 1
 fi
@@ -77,19 +77,20 @@ if [ ! -d "node_modules" ]; then
 fi
 
 echo "================================================"
-echo " STARTING BOT + DASHBOARD"
+echo " STARTING WHALE TRACKER + DASHBOARD"
 echo "================================================"
 echo ""
 echo "Dashboard will be at: http://localhost:5173/bot"
 echo "Opening browser in 10 seconds..."
 echo ""
 echo "What you should see in bot output:"
-echo "  - 'Found 1000 total markets'"
-echo "  - '→ 0 weather/climate markets'"
-echo "  - '⚠️  No weather/climate markets - using top volume markets' ← KEY!"
-echo "  - '→ Analyzing 20 high-volume markets' ← KEY!"
+echo "  - '🤖 Kalshi Follower Bot initialized'"
+echo "  - '🐋 Whale threshold: \$2.0M'"
+echo "  - '📊 Found 1000 total markets'"
+echo "  - '🎯 Analyzing top 50 high-volume markets' ← KEY!"
+echo "  - '🐋 WHALE DETECTED' (when whales found)"
 echo ""
-echo "If you DON'T see those lines, press Ctrl+C and run DIAGNOSE.sh"
+echo "Whale = Any trade ≥ \$2M in actual dollars"
 echo ""
 echo "Starting in 3 seconds..."
 sleep 3

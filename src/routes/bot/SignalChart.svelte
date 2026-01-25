@@ -12,8 +12,8 @@
 
 	let chartContainer: HTMLDivElement;
 
-	onMount(() => {
-		if (!data || data.length === 0) return;
+	function renderChart() {
+		if (!chartContainer || !data || data.length === 0) return;
 
 		// Clear any existing chart
 		d3.select(chartContainer).selectAll('*').remove();
@@ -171,13 +171,16 @@
 			.attr('fill', '#9ca3af')
 			.style('font-size', '12px')
 			.text('Avg Confidence');
+	}
+
+	// Initial render
+	onMount(() => {
+		renderChart();
 	});
 
 	// Re-render when data changes
 	$effect(() => {
-		if (chartContainer && data) {
-			onMount();
-		}
+		renderChart();
 	});
 </script>
 
